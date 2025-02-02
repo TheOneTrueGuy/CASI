@@ -1,0 +1,38 @@
+"Cyclical Adversarial Stepwise Improvement"
+
+This program uses a generator call and a critic call sequentially to a LLM to explore/produce ideas that are then subject to critique by the critic call. The results of the critic call are returned to the generator stage which is instructed to answer each criticism. After the first round the generator side will be instructed to also include in its reply any suggestions as to how the critic could provide better feedback based on the generators own reply and the critics most recent criticisms.
+
+Begin program - imports
+
+a filename with the current time and date in numeric form and the ".txt" extension will be assigned to variable date_time_filename
+and that file will be opened.
+
+an user interface with 2 column layout. 
+
+Each side would have a button and 3 text boxes (or more if needed) arranged vertically. 
+
+On the left the first text box would be for a system prompt for generation.
+
+On the left the second box would be for user input and the third box would be for output.
+
+when the left button is clicked the system prompt, user input and an instruction to reply in json format are sent to the LLM and the left system prompt textbox content is modified to prepare it for the next round with instructions to answer each criticism that has been returned. 
+
+A flag called genseg is set to True. Each succesive time the left button is clicked an if statement directly before the LLM call will check this flag and if True  append on the next generator prompt a request to also include suggestions on how the critic could provide better feedback.
+
+
+
+On the right the first text box would be a system prompt for creating a critic that would analyze and critique.
+
+On the right the first text box  would be to receive the output from the preceding generation run. 
+
+When the right button is clicked the critic prompt and most recent generator output would be sent to the LLM. 
+
+ 
+
+After the firsr round the "suggestions" tag (if any) from the generators last json response would be appended to each prompt.
+
+The data returned would be formated correctly from json to be placedin the user input text box so the criticisms can be answered by the generator.
+
+Each time a reply is had from the LLM API call it will be appended to the text file named in date_time_filename.
+
+A text box at the bottom would keep a running account of each exchange with prompts and replies updated each time a button is clicked.

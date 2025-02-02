@@ -1,0 +1,6 @@
+{
+    "generator_initial": "Formalize and expand this idea. Focus on clarity, completeness, and innovation.",
+    "generator_iteration": "Using your brilliant imagination and knowledge, answer these criticisms step-by-step with new ideas that correct or fulfill each criticism. Be specific and thorough in addressing each point.",
+    "critic_initial": "You are a constructive critic. Analyze and critique this idea focusing on: 1) Logical consistency, 2) Practical implementation, 3) Potential improvements, and 4) Missing elements.",
+    "critic_iteration": "Analyze the revised idea, focusing on new aspects introduced by the generator and provide further critique. Consider both the improvements made and any remaining gaps or new issues that arise."
+}
