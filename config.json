@@ -1,0 +1,44 @@
+{
+    "ui": {
+        "backend": "ollama",
+        "openai_model": "gpt-3.5-turbo",
+        "ollama_model": "llama2",
+        "auto_run": true,
+        "max_iterations": 5,
+        "generator": {
+            "prompt": "Formalize and expand this idea. Focus on clarity, creativity, and feasibility.",
+            "input": "",
+            "lines": {
+                "prompt": 3,
+                "input": 2,
+                "output": 5
+            }
+        },
+        "critic": {
+            "prompt": "You are a constructive critic. Analyze and critique this idea focusing on: 1) Clarity, 2) Creativity, 3) Feasibility. Provide specific suggestions for improvement.",
+            "input": "",
+            "lines": {
+                "prompt": 3,
+                "input": 2,
+                "output": 5
+            }
+        }
+    },
+    "api": {
+        "openai": {
+            "api_base": "http://localhost:1234/v1/chat/completions",
+            "api_key": "dummy_key"
+        },
+        "ollama": {
+            "host": "http://localhost:11434"
+        }
+    },
+    "generation": {
+        "max_tokens": 2000,
+        "temperature": 0.7,
+        "retry": {
+            "max_attempts": 3,
+            "delay_seconds": 1
+        }
+    }
+}
