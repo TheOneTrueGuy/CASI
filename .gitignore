@@ -39,3 +39,4 @@ ENV/
 
 # Local development
 .DS_Store
+cvenv/

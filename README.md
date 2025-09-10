@@ -1,57 +1,74 @@
-# CASI
-Cyclical Adversarial Stepwise Improvement
-To ensure that your CASI.py application runs successfully on the first try, you'll need to set up the environment variables and install any necessary dependencies. Here’s a step-by-step guide to help you through the process:
-Step 1: Install Required Dependencies
+# CASI: Cyclical Adversarial Stepwise Improvement
 
-    Python Installation:
-    Make sure you have Python installed on your system. You can download it from python.org.
+CASI is a Python application that uses a dual-agent system—a **Generator** and a **Critic**—to iteratively refine ideas, text, or other content. The process is cyclical: the Generator creates, the Critic provides feedback, and the Generator uses that feedback to improve its next output.
 
-2. Create a Virtual Environment (Optional but Recommended):
+This project has been consolidated to use a **Streamlit** web interface as its primary UI. The original Gradio interface and other development files have been moved to the `archive/` directory for historical reference.
 
-    It's a good practice to create a virtual environment for your project to manage dependencies. You can create one using the following commands:
-         python -m venv venv
-    - Activate the virtual environment:
-    On Windows:
-           venv\Scripts\activate
-    - On macOS/Linux:
-           source venv/bin/activate
+---
 
-3. Install Required Packages:
+### Step 1: Install Required Dependencies
 
-    Install the necessary packages using pip. You can create a requirements.txt file with the following content:
-         gradio
-         openai
-         python-dotenv
-    - Then, run the following command to install the packages:
-         pip install -r requirements.txt
+1.  **Python Installation**:
+    Make sure you have Python 3.8+ installed. You can download it from [python.org](https://python.org).
 
-Step 2: Set Up Environment Variables
+2.  **Create a Virtual Environment** (Recommended):
+    It's best practice to create a virtual environment to manage project dependencies in isolation.
 
-    Create a .env File:
-    In the same directory as your CASI.py file, create a file named .env. This file will store your environment variables.
+    ```bash
+    # Create the virtual environment
+    python -m venv venv
+    ```
 
-2. Add Environment Variables:
+    Activate the virtual environment:
+    -   **On Windows**:
+        ```powershell
+        .\venv\Scripts\Activate.ps1
+        ```
+    -   **On macOS/Linux**:
+        ```bash
+        source venv/bin/activate
+        ```
 
-    Open the .env file and add the following lines, replacing the placeholder values with your actual OpenAI API credentials:
-         OPENAI_API_BASE=http://localhost:1234/v1/chat/completions
-         OPENAI_API_KEY=your_openai_api_key_here
-         OPENAI_MODEL=your_model_name_here
-    - Make sure to replace your_openai_api_key_here with your actual OpenAI API key and your_model_name_here with the model you intend to use (e.g., gpt-3.5-turbo).
+3.  **Install Required Packages**:
+    With your virtual environment activated, install the necessary packages from the `requirements.txt` file.
 
-Step 3: Run the Application
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-    Run the Application:
-    With your virtual environment activated and the dependencies installed, you can run the application using the following command:
-         python CASI.py
-    Access the Gradio Interface:
-    After running the application, you should see output in the terminal indicating that the Gradio interface is launching. It will typically provide a local URL (e.g., http://127.0.0.1:7860) where you can access the application in your web browser.
+### Step 2: Set Up Environment Variables
 
-Step 4: Troubleshooting
+1.  **Create a `.env` File**:
+    In the root project directory, create a file named `.env`. This file will securely store your API keys and other configuration variables.
 
-    If you encounter any issues:
-    Double-check that all dependencies are installed correctly.
-    Ensure that your .env file is correctly formatted and located in the same directory as your CASI.py file.
-    Verify that your OpenAI API key is valid and that you have access to the specified model.
+2.  **Add Environment Variables**:
+    Open the `.env` file and add the following lines, replacing the placeholder values with your actual credentials. You only need to provide keys for the services you intend to use.
 
-Conclusion
-By following these steps, you should be able to set up the environment variables and dependencies needed to run your CASI.py application successfully.
+    ```env
+    # For OpenAI
+    OPENAI_API_KEY="your_openai_api_key_here"
+    OPENAI_MODEL="gpt-4-turbo"
+
+    # For Local LLMs via Ollama
+    OLLAMA_HOST="http://localhost:11434"
+    OLLAMA_MODEL="llama3"
+
+    # For Anthropic
+    ANTHROPIC_API_KEY="your_anthropic_api_key_here"
+    ```
+
+### Step 3: Run the Application
+
+With your virtual environment activated and dependencies installed, run the Streamlit application with the following command:
+
+```bash
+streamlit run app.py
+```
+
+This will launch the CASI application in a new tab in your web browser.
+
+### Step 4: Troubleshooting
+
+-   **`ModuleNotFoundError`**: Ensure your virtual environment is activated and you have run `pip install -r requirements.txt`.
+-   **API Errors**: Double-check that your `.env` file is correctly formatted, located in the project root, and contains valid API keys for the selected backend.
+-   **`streamlit` command not found**: Verify that your virtual environment is active, as Streamlit was installed there.

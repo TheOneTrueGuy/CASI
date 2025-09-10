@@ -1,0 +1,34 @@
+# Forward-Looking Ideas from 2025-04-16
+
+1. **Add Real API Support for More Services**
+   - Integrate Google Gemini, Anthropic Claude, Grok/Groq, and other LLM APIs.
+   - Add config fields for API keys and endpoints.
+   - Implement model selection and error handling for each service.
+
+2. **Agentic Stopping Mechanism**
+   - Allow agents to signal when to stop via a special output field or token (e.g., `"stop": true`).
+   - Consider heuristic or hybrid stopping strategies (e.g., stop on only positive feedback or after user confirmation).
+
+3. **Max Rounds in Automatic Mode**
+   - Implemented user-configurable max rounds to limit automatic cycles.
+   - Future: Combine with agentic stopping for flexible loop control.
+
+4. **Extensible Model/Service Selection**
+   - Per-agent dropdowns for selecting backend service and model.
+   - Placeholder logic for unimplemented APIs; easy to expand in the future.
+
+5. **Deployment Options**
+   - Consider porting to Flask for PythonAnywhere compatibility if public web access is needed.
+   - Alternatively, deploy Streamlit app to Streamlit Community Cloud, Heroku, or similar.
+
+6. **Enhanced Logging and Replay**
+   - Maintain detailed logs of all exchanges for replay, analysis, or export.
+   - Consider exporting sessions in various formats (JSON, XML, plaintext).
+
+7. **UI/UX Improvements**
+   - More detailed session summaries and navigation.
+   - Multi-session support, export, or analytics features.
+
+---
+
+If you want to add more points, just let me know!
