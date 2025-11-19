@@ -5,9 +5,10 @@ from pathlib import Path
 from typing import Any, Dict, List
 import sys
 import importlib.util
+import datetime
 
-# --- Import agent logic from CASI.py ---
-CASI_PATH = Path(__file__).parent / "CASI.py"
+# --- Import agent logic from webCASI.py ---
+CASI_PATH = Path(__file__).parent / "webCASI.py"
 spec = importlib.util.spec_from_file_location("casi_module", CASI_PATH)
 casi = importlib.util.module_from_spec(spec)
 sys.modules["casi_module"] = casi
@@ -45,7 +46,6 @@ def save_exchanges(exchanges: List[Dict[str, Any]]):
         json.dump(exchanges, f, indent=2)
 
 # --- Thread Data Structure ---
-import datetime
 
 def now_filename():
     return datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + ".txt"
@@ -64,32 +64,38 @@ def save_thread(thread):
     with open(THREAD_FILE, 'w') as f:
         json.dump(thread, f, indent=2)
 
+def get_backend_from_service(service_name: str) -> str:
+    mapping = {
+        "Local (Ollama)": "ollama",
+        "OpenAI": "openai",
+        "Google Gemini": "google",
+        "Anthropic Claude": "anthropic",
+        "Grok/Groq": "groq"
+    }
+    return mapping.get(service_name, "openai")
+
 # --- Streamlit UI ---
 st.set_page_config(page_title="CASI: Cyclical Adversarial Stepwise Improvement", layout="wide")
 st.title("CASI: Cyclical Adversarial Stepwise Improvement")
 
-fmt = st.radio("Select format for display/storage:", ["JSON", "XML", "Text"], horizontal=True)
+# Sidebar controls
+if st.sidebar.button("Forward"):
+    st.session_state.thread_idx = min(len(load_thread()) - 1, st.session_state.thread_idx + 1)
+    st.experimental_rerun()
+
+fmt = st.sidebar.radio("Format", ["JSON", "XML", "Text"], key="fmt")
+max_rounds = st.sidebar.number_input("Max Rounds (Automatic Mode)", min_value=1, max_value=100, value=10, step=1, key="max_rounds")
 
 thread = load_thread()
 if 'thread_idx' not in st.session_state:
     st.session_state.thread_idx = len(thread) - 1 if thread else -1
 
+current_state = thread[st.session_state.thread_idx] if (0 <= st.session_state.thread_idx < len(thread)) else None
+
 def serialize_state(state, fmt):
     if fmt == "JSON":
         return json.dumps(state, indent=2)
-    st.session_state.thread_idx = max(0, st.session_state.thread_idx - 1)
-    st.experimental_rerun()
-if st.sidebar.button("Forward"):
-    st.session_state.thread_idx = min(len(load_thread()) - 1, st.session_state.thread_idx + 1)
-    st.experimental_rerun()
-fmt = st.sidebar.radio("Format", ["JSON", "XML", "Text"], key="fmt")
-# --- Sidebar: Max Rounds ---
-max_rounds = st.sidebar.number_input("Max Rounds (Automatic Mode)", min_value=1, max_value=100, value=10, step=1, key="max_rounds")
-if 'current_round' not in st.session_state:
-    st.session_state.current_round = 1
-
-thread = load_thread()
-current_state = thread[st.session_state.thread_idx] if (0 <= st.session_state.thread_idx < len(thread)) else None
+    return str(state) # Fallback
 
 # --- Dual Column UI ---
 col_gen, col_crit = st.columns(2)
@@ -101,45 +107,41 @@ with col_gen:
     # --- Model/Service Selection ---
     gen_services = {
         "Local (Ollama)": ["llama2", "mistral", "custom-local-model"],
-        "OpenAI": ["gpt-3.5-turbo", "gpt-4"],
-        "Google Gemini": ["gemini-pro"],
-        "Anthropic Claude": ["claude-3-opus"],
-        "Grok/Groq": ["grok-1"],
+        "OpenAI": ["gpt-3.5-turbo", "gpt-4", "gpt-4o"],
+        "Google Gemini": ["gemini-1.5-pro-latest", "gemini-pro"],
+        "Anthropic Claude": ["claude-3-opus-20240229", "claude-3-sonnet-20240229"],
+        "Grok/Groq": ["llama3-8b-8192", "mixtral-8x7b-32768"],
     }
     gen_service = st.selectbox("Generator Service/API", list(gen_services.keys()), key="gen_service")
     gen_model = st.selectbox("Generator Model", gen_services[gen_service], key="gen_model")
-    gen_prompt = st.text_area("Generator Prompt", value=(current_state['generator']['prompt'] if current_state else casi.Config.load_prompt_templates()["generator_initial"]), disabled=(gen_mode == "Automatic"))
+    
+    default_gen_prompt = casi.config.prompts["generator_initial"]
+    gen_prompt = st.text_area("Generator Prompt", value=(current_state['generator']['prompt'] if current_state else default_gen_prompt), disabled=(gen_mode == "Automatic"))
     gen_input = st.text_area("Generator Input", value=(current_state['generator']['input'] if current_state else ""), disabled=(gen_mode == "Automatic"))
     gen_output = st.text_area("Generator Output", value=(current_state['generator']['output'] if current_state else ""), disabled=True)
+    
     if st.button("Run Generator"):
-        # Backend routing
-        def call_generator(service, model, prompt, user_input, critic_feedback):
-            if service == "Local (Ollama)":
-                return casi.generator("ollama", model, prompt, user_input, critic_feedback)
-            elif service == "OpenAI":
-                return casi.generator("openai", model, prompt, user_input, critic_feedback)
-            elif service == "Google Gemini":
-                return "[Google Gemini integration not yet implemented]"
-            elif service == "Anthropic Claude":
-                return "[Anthropic Claude integration not yet implemented]"
-            elif service == "Grok/Groq":
-                return "[Grok/Groq integration not yet implemented]"
-            else:
-                return "[Unknown service]"
+        backend = get_backend_from_service(gen_service)
+        
         # If resend and no previous output, use last input
         if gen_resend and not gen_output.strip() and thread:
             prev_input = thread[st.session_state.thread_idx]['generator']['input']
             gen_input = prev_input
-        gen_result = call_generator(gen_service, gen_model, gen_prompt, gen_input, critic_feedback="")
+            
+        gen_result = casi.generator(backend, gen_model, gen_prompt, gen_input, critic_feedback="")
+        # webCASI returns (response, suggestions)
+        gen_out = gen_result[0]
+        
         new_state = {
-            'generator': {'prompt': gen_prompt, 'input': gen_input, 'output': gen_result, 'mode': gen_mode, 'resend': gen_resend, 'service': gen_service, 'model': gen_model},
-            'critic': current_state['critic'] if current_state else {'prompt': casi.Config.load_prompt_templates()["critic_initial"], 'input': '', 'output': '', 'mode': 'Manual', 'resend': False, 'service': 'Local (Ollama)', 'model': 'llama2'},
+            'generator': {'prompt': gen_prompt, 'input': gen_input, 'output': gen_out, 'mode': gen_mode, 'resend': gen_resend, 'service': gen_service, 'model': gen_model},
+            'critic': current_state['critic'] if current_state else {'prompt': casi.config.prompts["critic_initial"], 'input': '', 'output': '', 'mode': 'Manual', 'resend': False, 'service': 'Local (Ollama)', 'model': 'llama2'},
             'timestamp': datetime.datetime.now().isoformat()
         }
         thread = thread[:st.session_state.thread_idx+1] + [new_state]
         save_thread(thread)
         st.session_state.thread_idx += 1
         st.experimental_rerun()
+    
     st.code(serialize_state({'service': gen_service, 'model': gen_model, 'prompt': gen_prompt, 'input': gen_input, 'output': gen_output}, fmt), language=fmt.lower() if fmt != "Text" else "text")
 
 with col_crit:
@@ -149,42 +151,33 @@ with col_crit:
     # --- Model/Service Selection ---
     crit_services = {
         "Local (Ollama)": ["llama2", "mistral", "custom-local-model"],
-        "OpenAI": ["gpt-3.5-turbo", "gpt-4"],
-        "Google Gemini": ["gemini-pro"],
-        "Anthropic Claude": ["claude-3-opus"],
-        "Grok/Groq": ["grok-1"],
+        "OpenAI": ["gpt-3.5-turbo", "gpt-4", "gpt-4o"],
+        "Google Gemini": ["gemini-1.5-pro-latest", "gemini-pro"],
+        "Anthropic Claude": ["claude-3-opus-20240229", "claude-3-sonnet-20240229"],
+        "Grok/Groq": ["llama3-8b-8192", "mixtral-8x7b-32768"],
     }
     crit_service = st.selectbox("Critic Service/API", list(crit_services.keys()), key="crit_service")
     crit_model = st.selectbox("Critic Model", crit_services[crit_service], key="crit_model")
-    crit_prompt = st.text_area("Critic Prompt", value=(current_state['critic']['prompt'] if current_state else casi.Config.load_prompt_templates()["critic_initial"]), disabled=(crit_mode == "Automatic"))
+    
+    default_crit_prompt = casi.config.prompts["critic_initial"]
+    crit_prompt = st.text_area("Critic Prompt", value=(current_state['critic']['prompt'] if current_state else default_crit_prompt), disabled=(crit_mode == "Automatic"))
     crit_input = st.text_area("Critic Input", value=(current_state['critic']['input'] if current_state else (current_state['generator']['output'] if current_state else "")), disabled=(crit_mode == "Automatic"))
     crit_output = st.text_area("Critic Output", value=(current_state['critic']['output'] if current_state else ""), disabled=True)
+    
     if st.button("Run Critic"):
-        # Backend routing
-        def call_critic(service, model, prompt, input_):
-            if service == "Local (Ollama)":
-                return casi.critic("ollama", model, prompt, input_)
-            elif service == "OpenAI":
-                return casi.critic("openai", model, prompt, input_)
-            elif service == "Google Gemini":
-                return "[Google Gemini integration not yet implemented]"
-            elif service == "Anthropic Claude":
-                return "[Anthropic Claude integration not yet implemented]"
-            elif service == "Grok/Groq":
-                return "[Grok/Groq integration not yet implemented]"
-            else:
-                return "[Unknown service]"
+        backend = get_backend_from_service(crit_service)
+        
         # If resend and no previous output, use last input
         if crit_resend and not crit_output.strip() and thread:
             prev_input = thread[st.session_state.thread_idx]['critic']['input']
             crit_input = prev_input
-        crit_result = call_critic(crit_service, crit_model, crit_prompt, crit_input)
-        if isinstance(crit_result, tuple):
-            crit_out = crit_result[0]
-        else:
-            crit_out = crit_result
+            
+        crit_result = casi.critic(backend, crit_model, crit_prompt, crit_input)
+        # webCASI returns (response, suggestions)
+        crit_out = crit_result[0]
+        
         new_state = {
-            'generator': current_state['generator'] if current_state else {'prompt': casi.Config.load_prompt_templates()["generator_initial"], 'input': '', 'output': '', 'mode': 'Manual', 'resend': False, 'service': 'Local (Ollama)', 'model': 'llama2'},
+            'generator': current_state['generator'] if current_state else {'prompt': casi.config.prompts["generator_initial"], 'input': '', 'output': '', 'mode': 'Manual', 'resend': False, 'service': 'Local (Ollama)', 'model': 'llama2'},
             'critic': {'prompt': crit_prompt, 'input': crit_input, 'output': crit_out, 'mode': crit_mode, 'resend': crit_resend, 'service': crit_service, 'model': crit_model},
             'timestamp': datetime.datetime.now().isoformat()
         }
@@ -192,6 +185,7 @@ with col_crit:
         save_thread(thread)
         st.session_state.thread_idx += 1
         st.experimental_rerun()
+        
     st.code(serialize_state({'service': crit_service, 'model': crit_model, 'prompt': crit_prompt, 'input': crit_input, 'output': crit_output}, fmt), language=fmt.lower() if fmt != "Text" else "text")
 
 # --- Strict Alternation in Automatic Mode ---
@@ -215,13 +209,17 @@ if (current_state
         # Critic's turn: Generator has run, but Critic has not.
         if current_state.get('generator', {}).get('output') and not is_round_complete:
             st.info(f"Running Critic (Round {round_count}/{max_rounds})...")
-            config = casi.Config()
-            backend = config.ui['backend']
-            model = config.openai_model if backend == "openai" else config.ollama_model
+            
+            # Use service/model from the current state's critic settings
+            crit_service_name = current_state['critic']['service']
+            crit_model_name = current_state['critic']['model']
+            backend = get_backend_from_service(crit_service_name)
+            
             crit_prompt = current_state['critic']['prompt']
             crit_input = current_state['generator']['output']
-            crit_result = casi.critic(backend, model, crit_prompt, crit_input)
-            crit_out = crit_result[0] if isinstance(crit_result, tuple) else crit_result
+            
+            crit_result = casi.critic(backend, crit_model_name, crit_prompt, crit_input)
+            crit_out = crit_result[0]
             
             # UPDATE the current state with the critic's output
             thread[-1]['critic']['output'] = crit_out
@@ -233,21 +231,40 @@ if (current_state
         # Generator's turn: The previous round is complete.
         elif is_round_complete:
             st.info(f"Running Generator (Round {round_count + 1}/{max_rounds})...")
-            config = casi.Config()
-            backend = config.ui['backend']
-            model = config.openai_model if backend == "openai" else config.ollama_model
+            
+            # Use service/model from the current state's generator settings
+            gen_service_name = current_state['generator']['service']
+            gen_model_name = current_state['generator']['model']
+            backend = get_backend_from_service(gen_service_name)
 
-            gen_prompt = config.prompts['generator_iteration']
+            gen_prompt = casi.config.prompts['generator_iteration']
             gen_input = current_state['generator']['output'] # Base for next iteration
             critic_feedback = current_state['critic']['output'] # Feedback for refinement
 
-            gen_result = casi.generator(backend, model, gen_prompt, gen_input, critic_feedback)
-            gen_out = gen_result[0] if isinstance(gen_result, tuple) else gen_result
+            gen_result = casi.generator(backend, gen_model_name, gen_prompt, gen_input, critic_feedback)
+            gen_out = gen_result[0]
 
             # Create a NEW state for the new round
+            # Preserve the service/model settings from the previous round
             new_state = {
-                'generator': {'prompt': gen_prompt, 'input': gen_input, 'output': gen_out, 'mode': 'Automatic', 'resend': False},
-                'critic': {'prompt': config.prompts['critic_iteration'], 'input': '', 'output': '', 'mode': 'Automatic', 'resend': False},
+                'generator': {
+                    'prompt': gen_prompt, 
+                    'input': gen_input, 
+                    'output': gen_out, 
+                    'mode': 'Automatic', 
+                    'resend': False,
+                    'service': gen_service_name,
+                    'model': gen_model_name
+                },
+                'critic': {
+                    'prompt': casi.config.prompts['critic_iteration'], 
+                    'input': '', 
+                    'output': '', 
+                    'mode': 'Automatic', 
+                    'resend': False,
+                    'service': current_state['critic']['service'],
+                    'model': current_state['critic']['model']
+                },
                 'timestamp': datetime.datetime.now().isoformat()
             }
             

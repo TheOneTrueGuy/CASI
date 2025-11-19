@@ -17,6 +17,11 @@ try:
 except ImportError:
     genai = None
 
+try:
+    import ollama
+except ImportError:
+    ollama = None
+
 # Placeholder for other SDKs
 # try:
 #     import groq
@@ -34,18 +39,43 @@ class Config:
         self.anthropic_api_key = os.getenv('ANTHROPIC_API_KEY')
         self.google_api_key = os.getenv('GOOGLE_API_KEY')
         self.groq_api_key = os.getenv('GROQ_API_KEY')
+        
+        # Ollama config
+        self.ollama_host = os.getenv('OLLAMA_HOST', 'http://localhost:11434')
 
         # Default model selections
         self.openai_model = os.getenv('OPENAI_MODEL', 'gpt-4o')
         self.anthropic_model = os.getenv('ANTHROPIC_MODEL', 'claude-3-opus-20240229')
         self.google_model = os.getenv('GOOGLE_MODEL', 'gemini-1.5-pro-latest')
         self.groq_model = os.getenv('GROQ_MODEL', 'llama3-8b-8192')
+        self.ollama_model = os.getenv('OLLAMA_MODEL', 'llama2')
 
         # Generation parameters
         self.max_retries = 3
         self.retry_delay = 2
         self.max_tokens = 4000
         self.temperature = 0.7
+        
+        # Load prompt templates
+        self.prompts = self.load_prompt_templates()
+
+    @staticmethod
+    def load_prompt_templates() -> Dict[str, str]:
+        default_prompts = {
+            "generator_initial": "Formalize and expand this idea. Focus on clarity, creativity, and feasibility.",
+            "generator_iteration": "Using your brilliant imagination and knowledge, answer these criticisms step-by-step with new ideas that correct or fulfill each criticism. Ensure your response addresses clarity, creativity, and feasibility.",
+            "critic_initial": "You are a constructive critic. Analyze and critique this idea focusing on: 1) Clarity, 2) Creativity, 3) Feasibility. Provide specific suggestions for improvement.",
+            "critic_iteration": "Analyze the revised idea, focusing on new aspects introduced by the generator. Rate the improvements and provide further critique on clarity, creativity, and feasibility."
+        }
+        
+        prompt_file = Path("prompts.json")
+        if prompt_file.exists():
+            try:
+                with open(prompt_file, 'r') as f:
+                    return json.load(f)
+            except json.JSONDecodeError:
+                return default_prompts
+        return default_prompts
 
 # Initialize configuration
 config = Config()
@@ -55,6 +85,12 @@ config = Config()
 # Configure Google Gemini client
 if config.google_api_key and genai:
     genai.configure(api_key=config.google_api_key)
+
+# Configure Ollama client
+if ollama:
+    ollama_client = ollama.Client(host=config.ollama_host)
+else:
+    ollama_client = None
 
 def safe_parse_json(raw_response: str) -> Tuple[Dict[str, Any], bool]:
     """Safely parse a JSON string from a model's response."""
@@ -74,7 +110,7 @@ def safe_parse_json(raw_response: str) -> Tuple[Dict[str, Any], bool]:
         pass
     return {"response": raw_response, "suggestions": []}, False
 
-def generate_response(backend: Literal["openai", "anthropic", "google", "groq"], model: str, prompt: str, input_text: str, critique: str = None, api_key: str = None) -> str:
+def generate_response(backend: Literal["openai", "anthropic", "google", "groq", "ollama"], model: str, prompt: str, input_text: str, critique: str = None, api_key: str = None) -> str:
     """Generate response with retry logic, using a user-provided API key if available."""
     attempt = 0
     full_prompt = f"{prompt}\n\nUser Input: {input_text}"
@@ -117,6 +153,19 @@ def generate_response(backend: Literal["openai", "anthropic", "google", "groq"],
                 gemini_model = genai.GenerativeModel(model)
                 response = gemini_model.generate_content(full_prompt)
                 return response.text
+            
+            elif backend == "ollama":
+                if not ollama_client: raise ImportError("Ollama SDK not installed or client not initialized.")
+                response = ollama_client.chat(
+                    model=model,
+                    messages=[{"role": "user", "content": full_prompt}],
+                    stream=False,
+                    options={
+                        "temperature": config.temperature,
+                        "num_predict": config.max_tokens
+                    }
+                )
+                return response['message']['content']
 
             else:
                 raise NotImplementedError(f"Backend '{backend}' is not yet implemented or supported for user keys.")

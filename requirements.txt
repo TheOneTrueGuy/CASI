@@ -6,7 +6,7 @@ streamlit>=1.32.0
 
 # --- Optional LLM API dependencies ---
 anthropic  # Anthropic Claude API
-# google-generativeai  # Google Gemini API
+google-generativeai  # Google Gemini API
 # groq  # Groq API
 # (Grok/xAI uses OpenAI SDK, just change base_url)
 
