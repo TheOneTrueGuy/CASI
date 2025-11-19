@@ -1,4 +1,7 @@
 # CASI
+To create a stable loop of adversarial critique that allows an Agent to improve its code/output quality without human intervention.
+
+
 Cyclical Adversarial Stepwise Improvement
 To ensure that your CASI.py application runs successfully on the first try, you'll need to set up the environment variables and install any necessary dependencies. Here’s a step-by-step guide to help you through the process:
 Step 1: Install Required Dependencies
