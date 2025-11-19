@@ -58,6 +58,12 @@ This project has been consolidated to use a **Streamlit** web interface as its p
 
     # For Anthropic
     ANTHROPIC_API_KEY="your_anthropic_api_key_here"
+    
+    # For Google Gemini
+    GOOGLE_API_KEY="your_google_api_key_here"
+
+    # For OpenRouter
+    OPENROUTER_API_KEY="your_openrouter_api_key_here"
     ```
 
 ### Step 3: Run the Application
@@ -70,8 +76,26 @@ streamlit run app.py
 
 This will launch the CASI application in a new tab in your web browser.
 
+### Features & Usage
+
+#### API Configuration
+You can configure your API keys in two ways:
+1.  **`.env` File**: Set them persistently as described in Step 2.
+2.  **UI Sidebar**: Expand the **"API Configuration"** section in the sidebar to enter or override keys temporarily for your current session.
+
+#### Using OpenRouter
+CASI supports **OpenRouter**, allowing access to a wide range of models.
+1.  Select **"OpenRouter"** as the service for either the Generator or Critic.
+2.  A text input field will appear for the **Model**.
+3.  Enter the full OpenRouter model ID (e.g., `anthropic/claude-3-opus`, `meta-llama/llama-3-70b-instruct`, `google/gemini-pro-1.5`).
+
+#### Automatic Loop
+1.  Set the **Mode** to "Automatic" for both agents.
+2.  Set the **Max Rounds** in the sidebar.
+3.  Run the Generator once to start the process. The system will then automatically alternate between Critic and Generator until the max rounds are reached.
+
 ### Step 4: Troubleshooting
 
 -   **`ModuleNotFoundError`**: Ensure your virtual environment is activated and you have run `pip install -r requirements.txt`.
--   **API Errors**: Double-check that your `.env` file is correctly formatted, located in the project root, and contains valid API keys for the selected backend.
+-   **API Errors**: Double-check that your `.env` file is correctly formatted, located in the project root, and contains valid API keys for the selected backend. Alternatively, check the keys entered in the sidebar.
 -   **`streamlit` command not found**: Verify that your virtual environment is active, as Streamlit was installed there.
