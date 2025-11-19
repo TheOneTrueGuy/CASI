@@ -3,6 +3,7 @@ openai>=0.28.0
 python-dotenv>=1.0.0
 ollama
 streamlit>=1.32.0
+duckduckgo-search>=5.0.0
 
 # --- Optional LLM API dependencies ---
 anthropic  # Anthropic Claude API

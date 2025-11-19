@@ -22,11 +22,12 @@ try:
 except ImportError:
     ollama = None
 
-# Placeholder for other SDKs
-# try:
-#     import groq
-# except ImportError:
-#     groq = None
+# Search tool import
+try:
+    from duckduckgo_search import DDGS
+    ddgs = DDGS()
+except ImportError:
+    ddgs = None
 
 # Load environment variables from .env file
 load_dotenv()
@@ -39,6 +40,7 @@ class Config:
         self.anthropic_api_key = os.getenv('ANTHROPIC_API_KEY')
         self.google_api_key = os.getenv('GOOGLE_API_KEY')
         self.groq_api_key = os.getenv('GROQ_API_KEY')
+        self.openrouter_api_key = os.getenv('OPENROUTER_API_KEY')
         
         # Ollama config
         self.ollama_host = os.getenv('OLLAMA_HOST', 'http://localhost:11434')
@@ -49,6 +51,7 @@ class Config:
         self.google_model = os.getenv('GOOGLE_MODEL', 'gemini-1.5-pro-latest')
         self.groq_model = os.getenv('GROQ_MODEL', 'llama3-8b-8192')
         self.ollama_model = os.getenv('OLLAMA_MODEL', 'llama2')
+        self.openrouter_model = os.getenv('OPENROUTER_MODEL', 'anthropic/claude-3-opus')
 
         # Generation parameters
         self.max_retries = 3
@@ -62,10 +65,10 @@ class Config:
     @staticmethod
     def load_prompt_templates() -> Dict[str, str]:
         default_prompts = {
-            "generator_initial": "Formalize and expand this idea. Focus on clarity, creativity, and feasibility.",
-            "generator_iteration": "Using your brilliant imagination and knowledge, answer these criticisms step-by-step with new ideas that correct or fulfill each criticism. Ensure your response addresses clarity, creativity, and feasibility.",
-            "critic_initial": "You are a constructive critic. Analyze and critique this idea focusing on: 1) Clarity, 2) Creativity, 3) Feasibility. Provide specific suggestions for improvement.",
-            "critic_iteration": "Analyze the revised idea, focusing on new aspects introduced by the generator. Rate the improvements and provide further critique on clarity, creativity, and feasibility."
+            "generator_initial": "You are a relentless and creative innovator. Formalize and expand this idea. Never give up on solving a problem; if you encounter a block, pivot and find a new angle. Focus on clarity, creativity, and feasibility.",
+            "generator_iteration": "Using your brilliant imagination and knowledge, answer these criticisms step-by-step with new ideas that correct or fulfill each criticism. Maintain a 'never give up' attitude—every critique is just a stepping stone to perfection. Ensure your response addresses clarity, creativity, and feasibility.",
+            "critic_initial": "You are a constructive but rigorous critic. Analyze and critique this idea focusing on: 1) Clarity, 2) Creativity, 3) Feasibility. Where possible, verify claims using your knowledge or search tools. Provide specific suggestions for improvement.",
+            "critic_iteration": "Analyze the revised idea, focusing on new aspects introduced by the generator. Rate the improvements and provide further critique on clarity, creativity, and feasibility. Cite sources or verified facts if applicable."
         }
         
         prompt_file = Path("prompts.json")
@@ -92,6 +95,23 @@ if ollama:
 else:
     ollama_client = None
 
+def search_web(query: str, max_results: int = 3) -> List[Dict[str, str]]:
+    """Perform a web search using DuckDuckGo."""
+    if not ddgs:
+        return [{"title": "Error", "body": "Search module (duckduckgo-search) not installed.", "href": ""}]
+    try:
+        results = list(ddgs.text(query, max_results=max_results))
+        return results
+    except Exception as e:
+        return [{"title": "Error", "body": f"Search failed: {str(e)}", "href": ""}]
+
+def format_search_results(results: List[Dict[str, str]]) -> str:
+    """Format search results for inclusion in a prompt."""
+    formatted = "Search Results:\n"
+    for r in results:
+        formatted += f"- [{r.get('title', 'No Title')}]({r.get('href', '#')}): {r.get('body', '')}\n"
+    return formatted
+
 def safe_parse_json(raw_response: str) -> Tuple[Dict[str, Any], bool]:
     """Safely parse a JSON string from a model's response."""
     try:
@@ -110,7 +130,7 @@ def safe_parse_json(raw_response: str) -> Tuple[Dict[str, Any], bool]:
         pass
     return {"response": raw_response, "suggestions": []}, False
 
-def generate_response(backend: Literal["openai", "anthropic", "google", "groq", "ollama"], model: str, prompt: str, input_text: str, critique: str = None, api_key: str = None) -> str:
+def generate_response(backend: Literal["openai", "anthropic", "google", "groq", "ollama", "openrouter"], model: str, prompt: str, input_text: str, critique: str = None, api_key: str = None) -> str:
     """Generate response with retry logic, using a user-provided API key if available."""
     attempt = 0
     full_prompt = f"{prompt}\n\nUser Input: {input_text}"
@@ -129,6 +149,31 @@ def generate_response(backend: Literal["openai", "anthropic", "google", "groq", 
                     messages=[{"role": "user", "content": full_prompt}],
                     max_tokens=config.max_tokens,
                     temperature=config.temperature
+                )
+                return response.choices[0].message.content
+
+            elif backend == "openrouter":
+                # OpenRouter uses OpenAI SDK with custom base_url
+                key = api_key if api_key else config.openrouter_api_key
+                if not key: raise ValueError("OpenRouter API key not found.")
+                
+                client = openai.OpenAI(
+                    base_url="https://openrouter.ai/api/v1",
+                    api_key=key,
+                )
+                
+                # OpenRouter recommends adding these headers
+                extra_headers = {
+                    "HTTP-Referer": "https://github.com/TheOneTrueGuy/CASI",
+                    "X-Title": "CASI"
+                }
+                
+                response = client.chat.completions.create(
+                    model=model,
+                    messages=[{"role": "user", "content": full_prompt}],
+                    max_tokens=config.max_tokens,
+                    temperature=config.temperature,
+                    extra_headers=extra_headers
                 )
                 return response.choices[0].message.content
 
@@ -178,15 +223,95 @@ def generate_response(backend: Literal["openai", "anthropic", "google", "groq", 
             time.sleep(config.retry_delay)
     return "Error: Function failed unexpectedly."
 
-def generator(backend: str, model: str, prompt: str, user_input: str, critic_feedback: str, api_key: str = None) -> Tuple[str, List[str]]:
+def agentic_step(backend: str, model: str, role: str, prompt: str, context: str, api_key: str = None) -> Tuple[str, Dict[str, Any]]:
+    """
+    Executes an agentic step: Plan -> Search -> Synthesize.
+    
+    1. PLAN: Ask the model what it needs to search for.
+    2. SEARCH: Execute the search queries.
+    3. SYNTHESIZE: Provide the original prompt + search results to the model for the final output.
+    
+    Returns:
+        Tuple[str, Dict]: (Augmented Prompt, Trace Data)
+    """
+    trace = {
+        "role": role,
+        "plan_prompt": "",
+        "plan_response": "",
+        "search_queries": [],
+        "search_results": [],
+        "augmented_prompt_snippet": ""
+    }
+    
+    # Step 1: Planning
+    plan_prompt = f"""
+    You are an expert {role}. You are about to perform the following task:
+    
+    {prompt}
+    
+    Context:
+    {context}
+    
+    Determine if you need external information to perform this task to the highest standard.
+    If yes, provide up to 3 specific search queries.
+    If no, strictly respond with "NO_SEARCH_NEEDED".
+    
+    Output Format:
+    Just the search queries, one per line.
+    """
+    trace["plan_prompt"] = plan_prompt
+    
+    plan_response = generate_response(backend, model, plan_prompt, "", None, api_key=api_key)
+    trace["plan_response"] = plan_response
+    
+    search_context = ""
+    if "NO_SEARCH_NEEDED" not in plan_response:
+        queries = [line.strip() for line in plan_response.split('\n') if line.strip()]
+        trace["search_queries"] = queries
+        
+        all_results = []
+        for q in queries[:3]: # Limit to 3 queries
+             results = search_web(q, max_results=2)
+             all_results.extend(results)
+             trace["search_results"].append({"query": q, "results": results})
+        
+        if all_results:
+            search_context = format_search_results(all_results)
+            
+    # Step 2: Final Generation with Context
+    final_prompt = f"{prompt}\n\n"
+    if search_context:
+        augmentation = f"Thinking Process:\nI have researched the following information to help with my task:\n{search_context}\n\n"
+        final_prompt += augmentation
+        trace["augmented_prompt_snippet"] = augmentation
+        
+    return final_prompt, trace
+
+def generator(backend: str, model: str, prompt: str, user_input: str, critic_feedback: str, api_key: str = None, use_search: bool = False) -> Tuple[str, List[str], Dict[str, Any]]:
     """Prepares prompt and calls generate_response for the Generator agent, passing the API key."""
-    json_prompt = f"{prompt}. Please respond in JSON format with keys for 'response' and 'suggestions'."
+    
+    trace_data = {}
+    final_prompt = prompt
+    if use_search:
+        # Run the agentic planning step to augment the prompt with search results
+        context = f"User Input: {user_input}\nCritique: {critic_feedback}"
+        final_prompt, trace_data = agentic_step(backend, model, "Generator", prompt, context, api_key=api_key)
+    
+    json_prompt = f"{final_prompt}. Please respond in JSON format with keys for 'response' and 'suggestions'."
     raw_response = generate_response(backend, model, json_prompt, user_input, critic_feedback, api_key=api_key)
     response_dict, _ = safe_parse_json(raw_response)
-    return response_dict.get('response', ''), response_dict.get('suggestions', [])
+    return response_dict.get('response', ''), response_dict.get('suggestions', []), trace_data
 
-def critic(backend: str, model: str, prompt: str, generator_output: str, api_key: str = None) -> Tuple[str, List[str]]:
+def critic(backend: str, model: str, prompt: str, generator_output: str, api_key: str = None, use_search: bool = False) -> Tuple[str, List[str], Dict[str, Any]]:
     """Prepares prompt and calls generate_response for the Critic agent, passing the API key."""
+    
+    trace_data = {}
+    final_prompt = prompt
+    if use_search:
+        # Run the agentic planning step to augment the prompt with search results
+        context = f"Generator's Output: {generator_output}"
+        final_prompt, trace_data = agentic_step(backend, model, "Critic", prompt, context, api_key=api_key)
+    
     scoring_prompt = """
     Please provide:
     1. Scores (1-10) for: Clarity, Creativity, Feasibility.
@@ -194,12 +319,12 @@ def critic(backend: str, model: str, prompt: str, generator_output: str, api_key
     3. Concrete suggestions for each area.
     Format your response as plain text.
     """
-    full_prompt = f"{prompt}\n\n{scoring_prompt}\n\nGenerator's Output to critique: {generator_output}"
+    full_prompt = f"{final_prompt}\n\n{scoring_prompt}\n\nGenerator's Output to critique: {generator_output}"
     response = generate_response(backend, model, full_prompt, "", None, api_key=api_key)
     
     # Simple parsing for suggestions
     suggestions = [line.strip('-* ') for line in response.split('\n') if line.strip().startswith(('-', '*'))]
-    return response, suggestions
+    return response, suggestions, trace_data
 
 def run_automatic_cycle(
     max_iterations: int,
@@ -214,13 +339,13 @@ def run_automatic_cycle(
 
     for i in range(max_iterations):
         # --- Generator's Turn ---
-        gen_output, _ = generator(
+        gen_output, _, gen_trace = generator(
             backend=gen_backend, model=gen_model, prompt=gen_prompt,
             user_input=current_input, critic_feedback=critic_feedback, api_key=gen_api_key
         )
 
         # --- Critic's Turn ---
-        crit_output, _ = critic(
+        crit_output, _, crit_trace = critic(
             backend=crit_backend, model=crit_model, prompt=crit_prompt,
             generator_output=gen_output, api_key=crit_api_key
         )
@@ -231,7 +356,9 @@ def run_automatic_cycle(
             'generator_input': current_input if i == 0 else "(From previous critique)",
             'critic_feedback_input': critic_feedback,
             'generator_output': gen_output,
-            'critic_output': crit_output
+            'critic_output': crit_output,
+            'generator_trace': gen_trace,
+            'critic_trace': crit_trace
         })
 
         # Prepare for the next iteration
