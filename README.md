@@ -1,5 +1,8 @@
 # CASI: Cyclical Adversarial Stepwise Improvement
 
+To create a stable loop of adversarial critique that allows an Agent to improve its code/output quality without human intervention.
+
+
 CASI is a Python application that uses a dual-agent system—a **Generator** and a **Critic**—to iteratively refine ideas, text, or other content. The process is cyclical: the Generator creates, the Critic provides feedback, and the Generator uses that feedback to improve its next output.
 
 This project has been consolidated to use a **Streamlit** web interface as its primary UI. The original Gradio interface and other development files have been moved to the `archive/` directory for historical reference.
