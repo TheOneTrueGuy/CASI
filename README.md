@@ -5,7 +5,7 @@ To create a stable loop of adversarial critique that allows an Agent to improve 
 
 CASI is a Python application that uses a dual-agent system—a **Generator** and a **Critic**—to iteratively refine ideas, text, or other content. The process is cyclical: the Generator creates, the Critic provides feedback, and the Generator uses that feedback to improve its next output.
 
-This project has been consolidated to use a **Streamlit** web interface as its primary UI. The original Gradio interface and other development files have been moved to the `archive/` directory for historical reference.
+The primary UI in this repo is a **Streamlit** app (`app.py`), but there is also a lightweight **Gradio** interface (`gradio_app.py`) that many users may find the simplest way to get started locally.
 
 ---
 
@@ -66,15 +66,31 @@ This project has been consolidated to use a **Streamlit** web interface as its p
     OPENROUTER_API_KEY="your_openrouter_api_key_here"
     ```
 
-### Step 3: Run the Application
+### Step 3: Run the Application (Streamlit or Gradio)
 
-With your virtual environment activated and dependencies installed, run the Streamlit application with the following command:
+With your virtual environment activated and dependencies installed, you have two main options:
+
+#### Option A: Streamlit (full-featured UI)
 
 ```bash
 streamlit run app.py
 ```
 
 This will launch the CASI application in a new tab in your web browser.
+
+#### Option B: Gradio (simple to get started)
+
+```bash
+python gradio_app.py
+```
+
+This starts a Gradio interface that wraps the same underlying `webCASI` logic. It exposes:
+
+- Generator and Critic panels
+- Manual back-and-forth between Generator and Critic
+- An automatic cycle mode
+- OpenAI / Anthropic / OpenRouter support with per-session keys
+- A "Download Trace" button to save a text log of the interaction history
 
 ### Features & Usage
 
