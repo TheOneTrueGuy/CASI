@@ -1,0 +1,203 @@
+{% extends "appbuilder/base.html" %}
+
+{% block content %}
+<pre>
+openai_keys: {{ openai_keys }}
+anthropic_keys: {{ anthropic_keys }}
+</pre>
+<div class="container-fluid">
+    <h3>CASI Tool: Cyclical Adversarial Stepwise Improvement</h3>
+    <p>The Generator's output is automatically used as the Critic's input for the next step.</p>
+    <hr>
+    <form method="POST">
+        <div class="row">
+            <div class="col-md-12">
+                <h4><i class="fa fa-key"></i> API Keys (Optional)</h4>
+                <p><small>Enter your own API keys to use your personal account. Keys are stored in your session and not saved on the server. Leave blank to use the site's default configuration (if available).</small></p>
+            </div>
+            <div class="col-md-5">
+                <div class="form-group">
+                    <label for="openai_api_key">OpenAI API Key:</label>
+                    {% if openai_keys %}
+                    <select class="form-control" name="openai_api_key">
+                        <option value="">-- Select a saved key --</option>
+                        {% for key in openai_keys %}
+                        <option value="{{ key }}">{{ key.__dict__ }}</option>
+                        {% endfor %}
+                    </select>
+                    {% else %}
+                    <input type="text" class="form-control" name="openai_api_key" value="{{ session.get('openai_api_key', '') }}">
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="form-group">
+                    <label for="anthropic_api_key">Anthropic API Key:</label>
+                    {% if anthropic_keys %}
+                    <select class="form-control" name="anthropic_api_key">
+                        <option value="">-- Select a saved key --</option>
+                        {% for key in anthropic_keys %}
+                        <option value="{{ key }}">{{ key.__dict__ }}</option>
+                        {% endfor %}
+                    </select>
+                    {% else %}
+                    <input type="text" class="form-control" name="anthropic_api_key" value="{{ session.get('anthropic_api_key', '') }}">
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group" style="margin-top: 25px;">
+                     <button type="submit" name="action" value="save_keys" class="btn btn-secondary btn-block">Save Keys</button>
+                </div>
+            </div>
+        </div>
+        <!-- OpenRouter key (simple text input for now) -->
+        <div class="row">
+            <div class="col-md-5">
+                <div class="form-group">
+                    <label for="openrouter_api_key">OpenRouter API Key:</label>
+                    <input type="text" class="form-control" name="openrouter_api_key" value="{{ session.get('openrouter_api_key', '') }}">
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-md-12">
+                <h4><i class="fa fa-cogs"></i> Automatic Cycle</h4>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                     <label for="max_iterations">Max Iterations:</label>
+                     <input type="number" class="form-control" name="max_iterations" value="{{ max_iterations or 5 }}" min="1" max="20">
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="form-group" style="margin-top: 25px;">
+                    <button type="submit" name="action" value="run_cycle" class="btn btn-success btn-block">Run Full Automatic Cycle</button>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+            <!-- Generator Column -->
+            <div class="col-md-6">
+                <h4><i class="fa fa-lightbulb-o"></i> Generator</h4>
+                <div class="form-group">
+                    <label for="generator_backend">Backend:</label>
+                    <select class="form-control" id="generator_backend" name="generator_backend">
+                        {% for backend in backends %}
+                        <option value="{{ backend }}" {% if backend == selected_gen_backend %}selected{% endif %}>{{ backend|capitalize }}</option>
+                        {% endfor %}
+                    </select>
+                    <p class="help-block">
+                        <small>
+                            When using <strong>OpenRouter</strong>, some example model IDs are:
+                            <code>openrouter/auto</code>,
+                            <code>anthropic/claude-3-opus</code>,
+                            <code>anthropic/claude-3.5-sonnet</code>,
+                            <code>openai/gpt-4o</code>.
+                        </small>
+                    </p>
+                </div>
+                <div class="form-group">
+                    <label for="generator_prompt">System Prompt:</label>
+                    <textarea class="form-control" name="generator_prompt" rows="3">{{ generator_prompt }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="generator_input">Initial Idea / User Input:</label>
+                    <textarea class="form-control" name="generator_input" rows="4" placeholder="Enter your initial idea here...">{{ generator_input }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="critic_output">Feedback from Critic (Input for this turn):</label>
+                    <textarea class="form-control" name="critic_output" rows="5" readonly>{{ critic_output }}</textarea>
+                </div>
+                <button type="submit" name="action" value="run_generator" class="btn btn-primary">Run Generator</button>
+                <hr>
+                <div class="form-group">
+                    <label for="generator_output_display">Generator's Output:</label>
+                    <textarea class="form-control" name="generator_output_display" rows="8" readonly>{{ generator_output }}</textarea>
+                </div>
+            </div>
+
+            <!-- Critic Column -->
+            <div class="col-md-6">
+                <h4><i class="fa fa-gavel"></i> Critic</h4>
+                <div class="form-group">
+                    <label for="critic_backend">Backend:</label>
+                    <select class="form-control" id="critic_backend" name="critic_backend">
+                        {% for backend in backends %}
+                        <option value="{{ backend }}" {% if backend == selected_crit_backend %}selected{% endif %}>{{ backend|capitalize }}</option>
+                        {% endfor %}
+                    </select>
+                    <p class="help-block">
+                        <small>
+                            OpenRouter also supports many models; you can reuse the same IDs here,
+                            for example <code>openrouter/auto</code> or <code>anthropic/claude-3.5-sonnet</code>.
+                        </small>
+                    </p>
+                </div>
+                <div class="form-group">
+                    <label for="critic_prompt">System Prompt:</label>
+                    <textarea class="form-control" name="critic_prompt" rows="3">{{ critic_prompt }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="critic_input">Generator's Output (Input for this turn):</label>
+                    <textarea class="form-control" name="critic_input" rows="12" readonly>{{ critic_input }}</textarea>
+                </div>
+                <button type="submit" name="action" value="run_critic" class="btn btn-info">Run Critic</button>
+                <hr>
+                <div class="form-group">
+                    <label for="critic_output_display">Critic's Feedback:</label>
+                    <textarea class="form-control" name="critic_output_display" rows="5" readonly>{{ critic_output }}</textarea>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    {% if cycle_history %}
+    <hr>
+    <div class="row">
+        <div class="col-md-12">
+            <h3><i class="fa fa-history"></i> Automatic Cycle History</h3>
+            {% for item in cycle_history %}
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">Iteration #{{ item.iteration }}</h4>
+                </div>
+                <div class="panel-body">
+                    <h5>Generator Output</h5>
+                    <pre>{{ item.generator_output }}</pre>
+                    <hr>
+                    <h5>Critic Feedback</h5>
+                    <pre>{{ item.critic_output }}</pre>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <hr>
+    <!-- Download trace section -->
+    <div class="row">
+        <div class="col-md-8">
+            <p>
+                <small>
+                    Download a text trace of the Generator/Critic conversation
+                    for this session.
+                </small>
+            </p>
+        </div>
+        <div class="col-md-4 text-right">
+            <button type="submit"
+                    name="action"
+                    value="download_trace"
+                    class="btn btn-primary"
+                    {% if not has_history %}disabled{% endif %}>
+                Download Trace (Text)
+            </button>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
