@@ -360,8 +360,9 @@ class CasiView(BaseView):
             "backends": available_backends,
             "selected_gen_backend": "openrouter",
             "selected_crit_backend": "openrouter",
-            "generator_model": getattr(casi.config, "openrouter_model", None),
-            "critic_model": getattr(casi.config, "openrouter_model", None),
+            # Hardcoded default as requested to override persistence issues
+            "generator_model": "qwen/qwen3-32b",
+            "critic_model": "qwen/qwen3-32b",
         }
 
         # Check for history ID in session
