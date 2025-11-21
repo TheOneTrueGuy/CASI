@@ -285,7 +285,7 @@ with col_crit:
     crit_service = st.selectbox("Critic Service/API", list(service_options.keys()), key="crit_service")
     
     if crit_service == "OpenRouter":
-        crit_model = st.text_input("Critic Model (OpenRouter ID)", value="anthropic/claude-3-opus", key="crit_model_custom")
+        crit_model = st.text_input("Critic Model (OpenRouter ID)", value=casi.config.openrouter_model, key="crit_model_custom")
     else:
         crit_model = st.selectbox("Critic Model", service_options[crit_service], key="crit_model")
     

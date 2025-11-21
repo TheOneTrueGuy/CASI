@@ -337,17 +337,35 @@ def run_automatic_cycle(
     history = []
     current_input = initial_input
     critic_feedback = ""
+    
+    # Determine if we should switch to iteration prompts after round 1
+    # We only switch if the user started with the default initial prompts.
+    gen_prompt_iter = config.prompts.get("generator_iteration")
+    crit_prompt_iter = config.prompts.get("critic_iteration")
+    
+    use_gen_iter = (gen_prompt == config.prompts.get("generator_initial"))
+    use_crit_iter = (crit_prompt == config.prompts.get("critic_initial"))
 
     for i in range(max_iterations):
+        # Determine prompts for this iteration
+        current_gen_prompt = gen_prompt
+        current_crit_prompt = crit_prompt
+        
+        if i > 0:
+            if use_gen_iter and gen_prompt_iter:
+                current_gen_prompt = gen_prompt_iter
+            if use_crit_iter and crit_prompt_iter:
+                current_crit_prompt = crit_prompt_iter
+
         # --- Generator's Turn ---
         gen_output, _, gen_trace = generator(
-            backend=gen_backend, model=gen_model, prompt=gen_prompt,
+            backend=gen_backend, model=gen_model, prompt=current_gen_prompt,
             user_input=current_input, critic_feedback=critic_feedback, api_key=gen_api_key
         )
 
         # --- Critic's Turn ---
         crit_output, _, crit_trace = critic(
-            backend=crit_backend, model=crit_model, prompt=crit_prompt,
+            backend=crit_backend, model=crit_model, prompt=current_crit_prompt,
             generator_output=gen_output, api_key=crit_api_key
         )
 
