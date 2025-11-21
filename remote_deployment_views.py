@@ -344,6 +344,11 @@ class CasiView(BaseView):
         for key in ['openai_api_key', 'anthropic_api_key', 'openrouter_api_key']:
             if key not in session: session[key] = ''
 
+        # Clean up legacy large history if present to free up cookie space
+        if 'casi_history' in session:
+            session.pop('casi_history', None)
+            session.modified = True
+
         prompts = {
             "generator": "Formalize and expand this idea.",
             "critic": "Analyze and critique this idea."
@@ -360,9 +365,9 @@ class CasiView(BaseView):
             "backends": available_backends,
             "selected_gen_backend": "openrouter",
             "selected_crit_backend": "openrouter",
-            # Hardcoded default as requested to override persistence issues
-            "generator_model": "qwen/qwen3-32b",
-            "critic_model": "qwen/qwen3-32b",
+            # Renamed keys to break browser autofill
+            "gen_model_id": "qwen/qwen3-32b",
+            "crit_model_id": "qwen/qwen3-32b",
         }
 
         # Check for history ID in session
@@ -398,8 +403,8 @@ class CasiView(BaseView):
         if request.method == 'POST':
             context['selected_gen_backend'] = request.form.get('generator_backend', 'openrouter')
             context['selected_crit_backend'] = request.form.get('critic_backend', 'openrouter')
-            context['generator_model'] = request.form.get('generator_model') or context.get('generator_model')
-            context['critic_model'] = request.form.get('critic_model') or context.get('critic_model')
+            context['gen_model_id'] = request.form.get('gen_model_id') or context.get('gen_model_id')
+            context['crit_model_id'] = request.form.get('crit_model_id') or context.get('crit_model_id')
             context['generator_prompt'] = request.form.get('generator_prompt')
             context['critic_prompt'] = request.form.get('critic_prompt')
             context['generator_input'] = request.form.get('generator_input')
@@ -438,10 +443,12 @@ class CasiView(BaseView):
                 elif context['selected_gen_backend'] == 'anthropic': api_key = session.get('anthropic_api_key')
                 elif context['selected_gen_backend'] == 'openrouter': api_key = session.get('openrouter_api_key')
 
-                gen_model = context.get('generator_model')
-                if not gen_model: gen_model = getattr(casi.config, f"{context['selected_gen_backend']}_model", None)
+                # Determine model to use (override or default)
+                gen_model = context.get('gen_model_id')
+                if not gen_model:
+                    gen_model = getattr(casi.config, f"{context['selected_gen_backend']}_model", None)
 
-                gen_output, _, _ = casi.generator(
+                gen_output, _, gen_trace = casi.generator(
                     backend=context['selected_gen_backend'],
                     model=gen_model,
                     prompt=context['generator_prompt'],
@@ -458,10 +465,11 @@ class CasiView(BaseView):
                 elif context['selected_crit_backend'] == 'anthropic': api_key = session.get('anthropic_api_key')
                 elif context['selected_crit_backend'] == 'openrouter': api_key = session.get('openrouter_api_key')
 
-                crit_model = context.get('critic_model')
+                # Determine model to use (override or default)
+                crit_model = context.get('crit_model_id')
                 if not crit_model: crit_model = getattr(casi.config, f"{context['selected_crit_backend']}_model", None)
 
-                crit_output, _, _ = casi.critic(
+                crit_output, _, crit_trace = casi.critic(
                     backend=context['selected_crit_backend'],
                     model=crit_model,
                     prompt=context['critic_prompt'],
