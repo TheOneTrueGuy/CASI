@@ -357,16 +357,31 @@ def run_automatic_cycle(
             if use_crit_iter and crit_prompt_iter:
                 current_crit_prompt = crit_prompt_iter
 
+        # Prepare Generator Input with Context
+        if i == 0:
+            gen_input_text = current_input
+        else:
+            # In subsequent rounds, provide full context to the generator
+            history_text = format_history_as_text(history)
+            gen_input_text = f"ORIGINAL GOAL: {initial_input}\n\nPREVIOUS HISTORY:\n{history_text}\n\nLATEST CRITIQUE:\n{critic_feedback}"
+
         # --- Generator's Turn ---
         gen_output, _, gen_trace = generator(
             backend=gen_backend, model=gen_model, prompt=current_gen_prompt,
-            user_input=current_input, critic_feedback=critic_feedback, api_key=gen_api_key
+            user_input=gen_input_text, critic_feedback="" if i > 0 else critic_feedback, api_key=gen_api_key
         )
+        
+        # Prepare Critic Input with Context
+        if i == 0:
+            crit_input_text = gen_output
+        else:
+            # In subsequent rounds, provide full context to the critic
+            crit_input_text = f"ORIGINAL GOAL: {initial_input}\n\nPREVIOUS HISTORY:\n{history_text}\n\nNEW DRAFT TO CRITIQUE:\n{gen_output}"
 
         # --- Critic's Turn ---
         crit_output, _, crit_trace = critic(
             backend=crit_backend, model=crit_model, prompt=current_crit_prompt,
-            generator_output=gen_output, api_key=crit_api_key
+            generator_output=crit_input_text, api_key=crit_api_key
         )
 
         # Store history for this iteration
@@ -391,3 +406,16 @@ def run_automatic_cycle(
         'final_critic_output': crit_output,
         'history': history
     }
+
+def format_history_as_text(history: List[Dict[str, Any]]) -> str:
+    """Formats the conversation history into a readable text log."""
+    output = []
+    for step in history:
+        output.append(f"=== Iteration {step['iteration']} ===")
+        if step['iteration'] == 1:
+            output.append(f"Original Input:\n{step.get('generator_input', '')}\n")
+        
+        output.append(f"--- Generator Output ---\n{step.get('generator_output', '')}\n")
+        output.append(f"--- Critic Feedback ---\n{step.get('critic_output', '')}\n")
+        output.append("-" * 40 + "\n")
+    return "".join(output)
