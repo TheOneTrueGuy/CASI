@@ -67,7 +67,7 @@ class Config:
     def load_prompt_templates() -> Dict[str, str]:
         default_prompts = {
             "generator_initial": "You are a relentless and creative innovator. Formalize and expand this idea. Never give up on solving a problem; if you encounter a block, pivot and find a new angle. Focus on clarity, creativity, and feasibility.",
-            "generator_iteration": "Using your brilliant imagination and knowledge, answer these criticisms step-by-step with new ideas that correct or fulfill each criticism. Maintain a 'never give up' attitude—every critique is just a stepping stone to perfection. Ensure your response addresses clarity, creativity, and feasibility.",
+            "generator_iteration": "Using your brilliant imagination and knowledge, answer and correct for these criticisms step-by-step with new ideas. Do not agree or acquiesce to the criticisms; instead, find creative ways to solve the problems they point out while preserving the core value of the idea.",
             "critic_initial": "You are a constructive but rigorous critic. Analyze and critique this idea focusing on: 1) Clarity, 2) Creativity, 3) Feasibility. Where possible, verify claims using your knowledge or search tools. Provide specific suggestions for improvement.",
             "critic_iteration": "Analyze the revised idea, focusing on new aspects introduced by the generator. Rate the improvements and provide further critique on clarity, creativity, and feasibility. Cite sources or verified facts if applicable."
         }
