@@ -241,7 +241,7 @@ You can select a backend (including OpenRouter) and optionally provide per-sessi
             backend = gr.Radio(
                 choices=["openai", "anthropic", "google", "ollama", "openrouter"],
                 label="Backend",
-                value="openai",
+                value="openrouter",
             )
             model = gr.Textbox(label="Model ID (optional)")
 

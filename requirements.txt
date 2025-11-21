@@ -1,5 +1,5 @@
 gradio>=3.50.2
-openai>=0.28.0
+openai>=1.0.0
 python-dotenv>=1.0.0
 ollama
 streamlit>=1.32.0

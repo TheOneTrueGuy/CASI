@@ -567,11 +567,11 @@ class CasiView(BaseView):
             "critic_input": "",
             "critic_output": "",
             "backends": available_backends,
-            "selected_gen_backend": "openai",
-            "selected_crit_backend": "openai",
+            "selected_gen_backend": "openrouter",
+            "selected_crit_backend": "openrouter",
             # Default models come from casi.config based on backend
-            "generator_model": getattr(casi.config, "openai_model", None),
-            "critic_model": getattr(casi.config, "openai_model", None),
+            "generator_model": getattr(casi.config, "openrouter_model", None),
+            "critic_model": getattr(casi.config, "openrouter_model", None),
         }
 
         # Load any existing CASI history so we can expose has_history for

@@ -92,6 +92,18 @@ This starts a Gradio interface that wraps the same underlying `webCASI` logic. I
 - OpenAI / Anthropic / OpenRouter support with per-session keys
 - A "Download Trace" button to save a text log of the interaction history
 
+### Deploying to Hugging Face Spaces
+
+This repository is ready for deployment to Hugging Face Spaces.
+
+1.  **Create a new Space** on Hugging Face.
+2.  Select **Gradio** as the SDK.
+3.  Choose the **AGPL-3.0** license (matching this repo).
+4.  **Important**: In the Space **Settings**, set the **App File** to `gradio_app.py`. (By default, it looks for `app.py`, which is the Streamlit version here).
+5.  The `requirements.txt` file will automatically handle dependencies.
+
+You can then set your API keys (e.g., `OPENROUTER_API_KEY`) as **Secret Variables** in the Space settings to provide defaults, or users can enter their own keys in the UI.
+
 ### Features & Usage
 
 #### API Configuration

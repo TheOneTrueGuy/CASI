@@ -51,7 +51,8 @@ class Config:
         self.google_model = os.getenv('GOOGLE_MODEL', 'gemini-1.5-pro-latest')
         self.groq_model = os.getenv('GROQ_MODEL', 'llama3-8b-8192')
         self.ollama_model = os.getenv('OLLAMA_MODEL', 'llama2')
-        self.openrouter_model = os.getenv('OPENROUTER_MODEL', 'anthropic/claude-3-opus')
+        self.openrouter_model = os.getenv('OPENROUTER_MODEL', 'qwen/qwen3-32b')
+        self.openrouter_fallback_model = 'qwen/qwen3-30b-a3b'
 
         # Generation parameters
         self.max_retries = 3
