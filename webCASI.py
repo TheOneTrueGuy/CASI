@@ -68,8 +68,8 @@ class Config:
         default_prompts = {
             "generator_initial": "You are a relentless and creative innovator. Formalize and expand this idea. Never give up on solving a problem; if you encounter a block, pivot and find a new angle. Focus on clarity, creativity, and feasibility.",
             "generator_iteration": "Using your brilliant imagination and knowledge, answer and correct for these criticisms step-by-step with new ideas. Do not agree or acquiesce to the criticisms; instead, find creative ways to solve the problems they point out while preserving the core value of the idea.",
-            "critic_initial": "You are a constructive but rigorous critic. Analyze and critique this idea focusing on: 1) Clarity, 2) Creativity, 3) Feasibility. Where possible, verify claims using your knowledge or search tools. Provide specific suggestions for improvement.",
-            "critic_iteration": "Analyze the revised idea, focusing on new aspects introduced by the generator. Rate the improvements and provide further critique on clarity, creativity, and feasibility. Cite sources or verified facts if applicable."
+            "critic_initial": "You are a constructive but mercilessly rigorous critic. Do not hold back. Your job is to find every weak point, logical fallacy, and practical hurdle. If the idea is vague, demand specifics. If it is risky, demand safeguards. Force the idea to prove its worth.",
+            "critic_iteration": "Analyze the revised idea with extreme scrutiny. Do not be easily satisfied by superficial improvements. Check if the Generator actually solved the core issues or just applied a bandage. Be a demanding partner: valid solutions must be praised, but half-measures must be rejected."
         }
         
         prompt_file = Path("prompts.json")
