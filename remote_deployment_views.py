@@ -135,28 +135,8 @@ def gen4(prompt, temp=0.0):
     reply = response_dict['choices'][0]['message']['content']
     return reply
 
-class ContactModelView(ModelView):
-    datamodel = SQLAInterface(Individual)
-    label_columns = {'contact_group':'Contacts Group'}
-    list_columns = ['name','email']
-    show_fieldsets = [('Summary', {'fields': ['name', 'gender', 'contact_group']}), ('Contact Info', {'fields': ['address', 'birthday', 'personal_phone', 'personal_celphone'], 'expanded': False})]
-    add_fieldsets = [('Summary', {'fields': ['name', 'gender', 'contact_group']}), ('Contact Info', {'fields': ['address', 'birthday', 'personal_phone', 'personal_celphone'], 'expanded': False})]
-    edit_fieldsets = [('Summary', {'fields': ['name', 'gender', 'contact_group']}), ('Contact Info', {'fields': ['address', 'birthday', 'personal_phone', 'personal_celphone'], 'expanded': False})]
-
-class GroupModelView(ModelView):
-    datamodel = SQLAInterface(ListGroup)
-    related_views = [ContactModelView]
-
-def fill_gender():
-    try:
-        db.session.add(Gender(name="Male"))
-        db.session.add(Gender(name="Female"))
-        db.session.commit()
-    except Exception:
-        db.session.rollback()
-
-appbuilder.add_view(GroupModelView, "List Groups", icon="fa-folder-open-o", category="Contacts", category_icon='fa-envelope')
-appbuilder.add_view(ContactModelView, "List Contacts", icon="fa-envelope", category="Contacts")
+# ContactModelView and GroupModelView removed to fix KeyError: 'gender'
+# They were commented out in previous working versions.
 
 class waitFormView(SimpleFormView):
     form = waitForm
@@ -394,6 +374,26 @@ class CasiView(BaseView):
         
         context['has_history'] = has_history
 
+        def load_history_from_session():
+            trace_id = session.get('casi_trace_id')
+            if trace_id and os.path.exists(f"/tmp/casi_trace_{trace_id}.json"):
+                try:
+                    with open(f"/tmp/casi_trace_{trace_id}.json", "r") as f:
+                        return json.load(f)
+                except:
+                    return []
+            return []
+
+        def save_history_to_session(history):
+            trace_id = session.get('casi_trace_id')
+            if not trace_id:
+                trace_id = str(uuid.uuid4())
+                session['casi_trace_id'] = trace_id
+            
+            with open(f"/tmp/casi_trace_{trace_id}.json", "w") as f:
+                json.dump(history, f)
+            return trace_id
+
         if request.method == 'POST':
             context['selected_gen_backend'] = request.form.get('generator_backend', 'openrouter')
             context['selected_crit_backend'] = request.form.get('critic_backend', 'openrouter')
@@ -460,7 +460,7 @@ class CasiView(BaseView):
                 crit_model = context.get('critic_model')
                 if not crit_model: crit_model = getattr(casi.config, f"{context['selected_crit_backend']}_model", None)
 
-                crit_output, _, crit_trace = casi.critic(
+                crit_output, _, _ = casi.critic(
                     backend=context['selected_crit_backend'],
                     model=crit_model,
                     prompt=context['critic_prompt'],
@@ -468,20 +468,6 @@ class CasiView(BaseView):
                     api_key=api_key
                 )
                 context['critic_output'] = crit_output
-
-                # Append to history
-                history = load_history_from_session()
-                # If the last item was a Generator step (same round), update it? 
-                # Or just append a Critic step. Appending is safer for linear log.
-                history.append({
-                    'iteration': len(history) + 1, 
-                    'role': 'Critic',
-                    'input': context['critic_input'],
-                    'output': crit_output,
-                    'trace': crit_trace,
-                })
-                save_history_to_session(history)
-                context['has_history'] = True
 
             elif action == 'run_cycle':
                 try:
