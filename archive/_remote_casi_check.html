@@ -100,8 +100,8 @@ anthropic_keys: {{ anthropic_keys }}
                     </p>
                 </div>
                 <div class="form-group">
-                    <label for="generator_model">Generator Model ID (optional):</label>
-                    <input type="text" class="form-control" name="generator_model" value="{{ generator_model or '' }}">
+                    <label for="gen_model_id">Generator Model ID (optional):</label>
+                    <input type="text" class="form-control" name="gen_model_id" value="{{ gen_model_id or '' }}">
                     <p class="help-block">
                         <small>
                             Leave blank to use the default model for the selected backend. For OpenRouter, you can enter
@@ -147,8 +147,8 @@ anthropic_keys: {{ anthropic_keys }}
                     </p>
                 </div>
                 <div class="form-group">
-                    <label for="critic_model">Critic Model ID (optional):</label>
-                    <input type="text" class="form-control" name="critic_model" value="{{ critic_model or '' }}">
+                    <label for="crit_model_id">Critic Model ID (optional):</label>
+                    <input type="text" class="form-control" name="crit_model_id" value="{{ crit_model_id or '' }}">
                     <p class="help-block">
                         <small>
                             Leave blank to use the default model for the selected backend.

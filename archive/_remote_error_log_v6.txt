@@ -1,0 +1,511 @@
+2025-11-01 20:39:50,741: Error checking premium features: (sqlite3.OperationalError) no such column: premium_features
+[SQL: SELECT premium_features FROM ab_user WHERE id = ?]
+[parameters: (1,)]
+(Background on this error at: https://sqlalche.me/e/14/e3q8)
+2025-11-01 20:41:17,626: 🔍 DATABASE SEARCH: Checking 3 source URLs for search functionality
+2025-11-01 20:41:17,627: 🔍 Checking URL: https://www.oregonlegislature.gov/legislators/find_your_legislator/mlg_search_results.asp
+2025-11-01 20:41:17,690: ✅ Found search URL in database for www.oregonlegislature.gov
+2025-11-01 20:41:17,690: ✅ TIER 1: Found search URL in database for https://www.oregonlegislature.gov/legislators/find...
+2025-11-01 20:41:18,638: 🔍 Search keywords: livestock rules pigs Oregon
+2025-11-01 20:41:18,640: 🔍 Database search: https://www.oregonlegislature.gov/citizen_engagement/Pages/Find-a-Bill.aspx?_wpcmWpid=livestock+rule...
+2025-11-01 20:41:21,966: ⚠️ Database search didn't find answer
+2025-11-01 20:41:21,966: 🔍 Checking URL: https://www.oregon.gov/oha/ph/Pages/rules.aspx
+2025-11-01 20:41:21,993: ✅ Found search URL in database for www.oregon.gov
+2025-11-01 20:41:21,993: ✅ TIER 1: Found search URL in database for https://www.oregon.gov/oha/ph/Pages/rules.aspx...
+2025-11-01 20:41:22,873: 🔍 Search keywords: livestock rules pigs Oregon
+2025-11-01 20:41:22,873: 🔍 Database search: https://www.oregon.gov/search?q=livestock+rules+pigs+Oregon...
+2025-11-01 20:41:26,311: ⚠️ Database search didn't find answer
+2025-11-01 20:41:26,311: 🔍 Checking URL: https://www.oregonlegislature.gov/bills_laws/Pages/oar.aspx
+2025-11-01 20:41:26,337: ✅ Found search URL in database for www.oregonlegislature.gov
+2025-11-01 20:41:26,338: ✅ TIER 1: Found search URL in database for https://www.oregonlegislature.gov/bills_laws/Pages...
+2025-11-01 20:41:27,843: 🔍 Search keywords: livestock rules pigs Oregon
+2025-11-01 20:41:27,844: 🔍 Database search: https://www.oregonlegislature.gov/citizen_engagement/Pages/Find-a-Bill.aspx?_wpcmWpid=livestock+rule...
+2025-11-01 20:41:29,911: ⚠️ Database search didn't find answer
+2025-11-01 20:41:29,911: 🎯 HEURISTIC TRIGGERED: Answer contains 'not found' phrase - forcing deeper exploration
+2025-11-01 20:41:29,912: 📎 Extracted URL from answer: https://oda.direct).
+2025-11-01 20:41:30,093: 🔄 Level 1: Fetching https://oda.direct).
+2025-11-01 20:41:30,104: Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7407401cb0a0>: Failed to establish a new connection: [Errno -2] Name or service not known')': /
+2025-11-01 20:41:32,106: Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x7407401ca170>: Failed to establish a new connection: [Errno -2] Name or service not known')': /
+2025-11-01 20:41:32,214: ⚠️ Fetch failed at depth 1
+2025-11-01 20:41:32,219: 🔗 Found 2 URLs in answer text, validating...
+2025-11-01 20:41:32,291: ✅ URL validated: https://oda.direct (status 200)
+2025-11-01 20:41:32,532: Certificate did not match expected hostname: oregonlegislature.gov. Certificate: {'subject': ((('countryName', 'US'),), (('stateOrProvinceName', 'Oregon'),), (('localityName', 'Salem'),), (('organizationName', 'Oregon Legislative Administration Committee'),), (('commonName', 'www.oregonlegislature.gov'),)), 'issuer': ((('countryName', 'US'),), (('organizationName', 'DigiCert Inc'),), (('commonName', 'DigiCert Global G2 TLS RSA SHA256 2020 CA1'),)), 'version': 3, 'serialNumber': '041D5A102641A51FE41C1A8BA384E1B9', 'notBefore': 'Aug 14 00:00:00 2025 GMT', 'notAfter': 'Aug 12 23:59:59 2026 GMT', 'subjectAltName': (('DNS', 'www.oregonlegislature.gov'), ('DNS', 'feeds.oregonlegislature.gov'), ('DNS', 'archives.oregonlegislature.gov')), 'OCSP': ('http://ocsp.digicert.com',), 'caIssuers': ('http://cacerts.digicert.com/DigiCertGlobalG2TLSRSASHA2562020CA1-1.crt',), 'crlDistributionPoints': ('http://crl3.digicert.com/DigiCertGlobalG2TLSRSASHA2562020CA1-1.crl', 'http://crl4.digicert.com/DigiCertGlobalG2TLSRSASHA2562020CA1-1.crl')}
+2025-11-01 20:41:32,533: ❌ URL validation failed: https://oregonlegislature.gov/bills_laws/Pages/oar.aspx - HTTPSConnectionPool(host='oregonlegislature.gov', port=443): Max retries exceeded with url: /bills_l
+2025-11-01 20:41:32,898: 🗑️ Removed invalid URL from answer: https://oregonlegislature.gov/bills_laws/Pages/oar.aspx
+2025-11-01 20:41:32,901: 🔍 _clean_link_markers called. Has markers: False
+2025-11-01 20:41:32,904: 🔍 _clean_link_markers called. Has markers: False
+2025-11-01 20:41:32,977: 📤 Sending response with 3 citations (took 35.66s)
+2025-11-19 22:48:35,908: OSError: write error
+2025-11-20 02:28:47,900: OSError: write error
+2025-11-21 03:23:39,673: Error running WSGI application
+2025-11-21 03:23:39,680: ValueError: too many values to unpack (expected 2)
+2025-11-21 03:23:39,680:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask/app.py", line 2551, in __call__
+2025-11-21 03:23:39,680:     return self.wsgi_app(environ, start_response)
+2025-11-21 03:23:39,680: 
+2025-11-21 03:23:39,680:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask/app.py", line 2531, in wsgi_app
+2025-11-21 03:23:39,680:     response = self.handle_exception(e)
+2025-11-21 03:23:39,681: 
+2025-11-21 03:23:39,681:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask/app.py", line 2528, in wsgi_app
+2025-11-21 03:23:39,681:     response = self.full_dispatch_request()
+2025-11-21 03:23:39,681: 
+2025-11-21 03:23:39,681:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask/app.py", line 1825, in full_dispatch_request
+2025-11-21 03:23:39,681:     rv = self.handle_user_exception(e)
+2025-11-21 03:23:39,681: 
+2025-11-21 03:23:39,681:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask/app.py", line 1823, in full_dispatch_request
+2025-11-21 03:23:39,681:     rv = self.dispatch_request()
+2025-11-21 03:23:39,682: 
+2025-11-21 03:23:39,682:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask/app.py", line 1799, in dispatch_request
+2025-11-21 03:23:39,682:     return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+2025-11-21 03:23:39,682: 
+2025-11-21 03:23:39,682:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/security/decorators.py", line 139, in wraps
+2025-11-21 03:23:39,682:     return f(self, *args, **kwargs)
+2025-11-21 03:23:39,682: 
+2025-11-21 03:23:39,682:   File "/home/Guyzer/Firsty/app/views.py", line 634, in tool
+2025-11-21 03:23:39,682:     gen_output, _ = casi.generator(
+2025-11-21 03:27:13,597: Error running WSGI application
+2025-11-21 03:27:13,603: ValueError: too many values to unpack (expected 2)
+2025-11-21 03:27:13,603:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask/app.py", line 2551, in __call__
+2025-11-21 03:27:13,603:     return self.wsgi_app(environ, start_response)
+2025-11-21 03:27:13,603: 
+2025-11-21 03:27:13,604:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask/app.py", line 2531, in wsgi_app
+2025-11-21 03:27:13,604:     response = self.handle_exception(e)
+2025-11-21 03:27:13,604: 
+2025-11-21 03:27:13,604:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask/app.py", line 2528, in wsgi_app
+2025-11-21 03:27:13,604:     response = self.full_dispatch_request()
+2025-11-21 03:27:13,605: 
+2025-11-21 03:27:13,605:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask/app.py", line 1825, in full_dispatch_request
+2025-11-21 03:27:13,605:     rv = self.handle_user_exception(e)
+2025-11-21 03:27:13,606: 
+2025-11-21 03:27:13,606:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask/app.py", line 1823, in full_dispatch_request
+2025-11-21 03:27:13,606:     rv = self.dispatch_request()
+2025-11-21 03:27:13,607: 
+2025-11-21 03:27:13,607:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask/app.py", line 1799, in dispatch_request
+2025-11-21 03:27:13,607:     return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+2025-11-21 03:27:13,607: 
+2025-11-21 03:27:13,608:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/security/decorators.py", line 139, in wraps
+2025-11-21 03:27:13,608:     return f(self, *args, **kwargs)
+2025-11-21 03:27:13,608: 
+2025-11-21 03:27:13,608:   File "/home/Guyzer/Firsty/app/views.py", line 634, in tool
+2025-11-21 03:27:13,608:     gen_output, _ = casi.generator(
+2025-11-21 03:30:36,506: OSError: write error
+2025-11-21 03:30:54,227: Error running WSGI application
+2025-11-21 03:30:54,230: ValueError: too many values to unpack (expected 2)
+2025-11-21 03:30:54,230:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask/app.py", line 2551, in __call__
+2025-11-21 03:30:54,230:     return self.wsgi_app(environ, start_response)
+2025-11-21 03:30:54,231: 
+2025-11-21 03:30:54,231:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask/app.py", line 2531, in wsgi_app
+2025-11-21 03:30:54,231:     response = self.handle_exception(e)
+2025-11-21 03:30:54,231: 
+2025-11-21 03:30:54,231:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask/app.py", line 2528, in wsgi_app
+2025-11-21 03:30:54,231:     response = self.full_dispatch_request()
+2025-11-21 03:30:54,231: 
+2025-11-21 03:30:54,231:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask/app.py", line 1825, in full_dispatch_request
+2025-11-21 03:30:54,232:     rv = self.handle_user_exception(e)
+2025-11-21 03:30:54,232: 
+2025-11-21 03:30:54,232:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask/app.py", line 1823, in full_dispatch_request
+2025-11-21 03:30:54,232:     rv = self.dispatch_request()
+2025-11-21 03:30:54,232: 
+2025-11-21 03:30:54,232:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask/app.py", line 1799, in dispatch_request
+2025-11-21 03:30:54,232:     return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+2025-11-21 03:30:54,232: 
+2025-11-21 03:30:54,233:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/security/decorators.py", line 139, in wraps
+2025-11-21 03:30:54,233:     return f(self, *args, **kwargs)
+2025-11-21 03:30:54,233: 
+2025-11-21 03:30:54,233:   File "/home/Guyzer/Firsty/app/views.py", line 634, in tool
+2025-11-21 03:30:54,233:     gen_output, _ = casi.generator(
+2025-11-21 03:34:12,253: Error running WSGI application
+2025-11-21 03:34:12,255: ValueError: too many values to unpack (expected 2)
+2025-11-21 03:34:12,256:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask/app.py", line 2551, in __call__
+2025-11-21 03:34:12,256:     return self.wsgi_app(environ, start_response)
+2025-11-21 03:34:12,256: 
+2025-11-21 03:34:12,256:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask/app.py", line 2531, in wsgi_app
+2025-11-21 03:34:12,256:     response = self.handle_exception(e)
+2025-11-21 03:34:12,256: 
+2025-11-21 03:34:12,257:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask/app.py", line 2528, in wsgi_app
+2025-11-21 03:34:12,257:     response = self.full_dispatch_request()
+2025-11-21 03:34:12,257: 
+2025-11-21 03:34:12,257:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask/app.py", line 1825, in full_dispatch_request
+2025-11-21 03:34:12,257:     rv = self.handle_user_exception(e)
+2025-11-21 03:34:12,257: 
+2025-11-21 03:34:12,257:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask/app.py", line 1823, in full_dispatch_request
+2025-11-21 03:34:12,257:     rv = self.dispatch_request()
+2025-11-21 03:34:12,258: 
+2025-11-21 03:34:12,258:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask/app.py", line 1799, in dispatch_request
+2025-11-21 03:34:12,258:     return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+2025-11-21 03:34:12,258: 
+2025-11-21 03:34:12,258:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/security/decorators.py", line 139, in wraps
+2025-11-21 03:34:12,258:     return f(self, *args, **kwargs)
+2025-11-21 03:34:12,258: 
+2025-11-21 03:34:12,258:   File "/home/Guyzer/Firsty/app/views.py", line 634, in tool
+2025-11-21 03:34:12,259:     gen_output, _ = casi.generator(
+2025-11-21 03:34:20,509: OSError: write error
+2025-11-21 03:34:27,713: Error running WSGI application
+2025-11-21 03:34:27,716: ValueError: too many values to unpack (expected 2)
+2025-11-21 03:34:27,716:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask/app.py", line 2551, in __call__
+2025-11-21 03:34:27,716:     return self.wsgi_app(environ, start_response)
+2025-11-21 03:34:27,716: 
+2025-11-21 03:34:27,716:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask/app.py", line 2531, in wsgi_app
+2025-11-21 03:34:27,717:     response = self.handle_exception(e)
+2025-11-21 03:34:27,717: 
+2025-11-21 03:34:27,717:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask/app.py", line 2528, in wsgi_app
+2025-11-21 03:34:27,717:     response = self.full_dispatch_request()
+2025-11-21 03:34:27,717: 
+2025-11-21 03:34:27,717:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask/app.py", line 1825, in full_dispatch_request
+2025-11-21 03:34:27,718:     rv = self.handle_user_exception(e)
+2025-11-21 03:34:27,718: 
+2025-11-21 03:34:27,718:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask/app.py", line 1823, in full_dispatch_request
+2025-11-21 03:34:27,718:     rv = self.dispatch_request()
+2025-11-21 03:34:27,718: 
+2025-11-21 03:34:27,718:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask/app.py", line 1799, in dispatch_request
+2025-11-21 03:34:27,718:     return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+2025-11-21 03:34:27,719: 
+2025-11-21 03:34:27,719:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/security/decorators.py", line 139, in wraps
+2025-11-21 03:34:27,719:     return f(self, *args, **kwargs)
+2025-11-21 03:34:27,719: 
+2025-11-21 03:34:27,719:   File "/home/Guyzer/Firsty/app/views.py", line 634, in tool
+2025-11-21 03:34:27,719:     gen_output, _ = casi.generator(
+2025-11-21 03:38:48,330: OSError: write error
+2025-11-21 03:40:26,636: OSError: write error
+2025-11-21 03:42:38,484: OSError: write error
+2025-11-21 03:44:23,138: OSError: write error
+2025-11-21 03:44:36,772: OSError: write error
+2025-11-21 04:21:50,330: OSError: write error
+2025-11-21 04:26:31,276: OSError: write error
+2025-11-21 04:31:01,685: /home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/werkzeug/sansio/response.py:230: UserWarning: The 'session' cookie is too large: the value was 4083 bytes but the header required 26 extra bytes. The final size was 4109 bytes but the limit is 4093 bytes. Browsers may silently ignore cookies larger than this.
+2025-11-21 04:31:01,685:   dump_cookie(
+2025-11-21 04:52:36,028: Error running WSGI application
+2025-11-21 04:52:36,045: KeyError: 'gender'
+2025-11-21 04:52:36,046:   File "/var/www/guyzer_pythonanywhere_com_wsgi.py", line 53, in <module>
+2025-11-21 04:52:36,046:     from app import app as application  # noqa
+2025-11-21 04:52:36,046: 
+2025-11-21 04:52:36,046:   File "/home/Guyzer/Firsty/app/__init__.py", line 56, in <module>
+2025-11-21 04:52:36,046:     from . import views
+2025-11-21 04:52:36,046: 
+2025-11-21 04:52:36,046:   File "/home/Guyzer/Firsty/app/views.py", line 159, in <module>
+2025-11-21 04:52:36,047:     appbuilder.add_view(ContactModelView, "List Contacts", icon="fa-envelope", category="Contacts")
+2025-11-21 04:52:36,047: 
+2025-11-21 04:52:36,047:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/base.py", line 440, in add_view
+2025-11-21 04:52:36,047:     baseview = self._check_and_init(baseview)
+2025-11-21 04:52:36,047: 
+2025-11-21 04:52:36,047:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/base.py", line 358, in _check_and_init
+2025-11-21 04:52:36,047:     baseview = baseview()
+2025-11-21 04:52:36,048: 
+2025-11-21 04:52:36,048:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/views.py", line 526, in __init__
+2025-11-21 04:52:36,048:     super(ModelView, self).__init__(**kwargs)
+2025-11-21 04:52:36,048: 
+2025-11-21 04:52:36,048:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/views.py", line 179, in __init__
+2025-11-21 04:52:36,048:     super().__init__(**kwargs)
+2025-11-21 04:52:36,049: 
+2025-11-21 04:52:36,049:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/baseviews.py", line 859, in __init__
+2025-11-21 04:52:36,049:     super(BaseCRUDView, self).__init__(**kwargs)
+2025-11-21 04:52:36,049: 
+2025-11-21 04:52:36,049:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/baseviews.py", line 595, in __init__
+2025-11-21 04:52:36,049:     self._init_forms()
+2025-11-21 04:52:36,049: 
+2025-11-21 04:52:36,049:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/baseviews.py", line 885, in _init_forms
+2025-11-21 04:52:36,050:     self.add_form = conv.create_form(
+2025-11-21 04:52:36,050: 
+2025-11-21 04:52:36,050:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/forms.py", line 309, in create_form
+2025-11-21 04:52:36,050:     self._convert_col(
+2025-11-21 04:52:36,050: 
+2025-11-21 04:52:36,050:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/forms.py", line 262, in _convert_col
+2025-11-21 04:52:36,050:     return self._convert_simple(
+2025-11-21 04:52:36,050: 
+2025-11-21 04:52:36,051:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/forms.py", line 215, in _convert_simple
+2025-11-21 04:52:36,051:     default_value = self.datamodel.get_col_default(col_name)
+2025-11-21 04:52:36,051: 
+2025-11-21 04:52:36,051:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/models/sqla/interface.py", line 851, in get_col_default
+2025-11-21 04:52:36,051:     default = getattr(self.list_columns[col_name], "default", None)
+2025-11-21 04:52:36,051: ***************************************************
+2025-11-21 04:52:36,051: If you're seeing an import error and don't know why,
+2025-11-21 04:52:36,051: we have a dedicated help page to help you debug: 
+2025-11-21 04:52:36,052: https://help.pythonanywhere.com/pages/DebuggingImportError/
+2025-11-21 04:52:36,052: ***************************************************
+2025-11-21 04:52:36,298: Error running WSGI application
+2025-11-21 04:52:36,299: KeyError: 'gender'
+2025-11-21 04:52:36,299:   File "/var/www/guyzer_pythonanywhere_com_wsgi.py", line 53, in <module>
+2025-11-21 04:52:36,299:     from app import app as application  # noqa
+2025-11-21 04:52:36,299: 
+2025-11-21 04:52:36,299:   File "/home/Guyzer/Firsty/app/__init__.py", line 56, in <module>
+2025-11-21 04:52:36,299:     from . import views
+2025-11-21 04:52:36,300: 
+2025-11-21 04:52:36,300:   File "/home/Guyzer/Firsty/app/views.py", line 159, in <module>
+2025-11-21 04:52:36,300:     appbuilder.add_view(ContactModelView, "List Contacts", icon="fa-envelope", category="Contacts")
+2025-11-21 04:52:36,300: 
+2025-11-21 04:52:36,300:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/base.py", line 440, in add_view
+2025-11-21 04:52:36,300:     baseview = self._check_and_init(baseview)
+2025-11-21 04:52:36,300: 
+2025-11-21 04:52:36,301:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/base.py", line 358, in _check_and_init
+2025-11-21 04:52:36,301:     baseview = baseview()
+2025-11-21 04:52:36,301: 
+2025-11-21 04:52:36,301:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/views.py", line 526, in __init__
+2025-11-21 04:52:36,301:     super(ModelView, self).__init__(**kwargs)
+2025-11-21 04:52:36,301: 
+2025-11-21 04:52:36,301:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/views.py", line 179, in __init__
+2025-11-21 04:52:36,302:     super().__init__(**kwargs)
+2025-11-21 04:52:36,302: 
+2025-11-21 04:52:36,302:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/baseviews.py", line 859, in __init__
+2025-11-21 04:52:36,302:     super(BaseCRUDView, self).__init__(**kwargs)
+2025-11-21 04:52:36,302: 
+2025-11-21 04:52:36,302:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/baseviews.py", line 595, in __init__
+2025-11-21 04:52:36,302:     self._init_forms()
+2025-11-21 04:52:36,302: 
+2025-11-21 04:52:36,303:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/baseviews.py", line 885, in _init_forms
+2025-11-21 04:52:36,303:     self.add_form = conv.create_form(
+2025-11-21 04:52:36,303: 
+2025-11-21 04:52:36,303:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/forms.py", line 309, in create_form
+2025-11-21 04:52:36,303:     self._convert_col(
+2025-11-21 04:52:36,303: 
+2025-11-21 04:52:36,303:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/forms.py", line 262, in _convert_col
+2025-11-21 04:52:36,303:     return self._convert_simple(
+2025-11-21 04:52:36,304: 
+2025-11-21 04:52:36,304:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/forms.py", line 215, in _convert_simple
+2025-11-21 04:52:36,304:     default_value = self.datamodel.get_col_default(col_name)
+2025-11-21 04:52:36,304: 
+2025-11-21 04:52:36,304:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/models/sqla/interface.py", line 851, in get_col_default
+2025-11-21 04:52:36,304:     default = getattr(self.list_columns[col_name], "default", None)
+2025-11-21 04:52:36,304: ***************************************************
+2025-11-21 04:52:36,304: If you're seeing an import error and don't know why,
+2025-11-21 04:52:36,305: we have a dedicated help page to help you debug: 
+2025-11-21 04:52:36,305: https://help.pythonanywhere.com/pages/DebuggingImportError/
+2025-11-21 04:52:36,305: ***************************************************
+2025-11-21 04:53:28,927: Error running WSGI application
+2025-11-21 04:53:28,928: KeyError: 'gender'
+2025-11-21 04:53:28,928:   File "/var/www/guyzer_pythonanywhere_com_wsgi.py", line 53, in <module>
+2025-11-21 04:53:28,928:     from app import app as application  # noqa
+2025-11-21 04:53:28,929: 
+2025-11-21 04:53:28,929:   File "/home/Guyzer/Firsty/app/__init__.py", line 56, in <module>
+2025-11-21 04:53:28,929:     from . import views
+2025-11-21 04:53:28,929: 
+2025-11-21 04:53:28,930:   File "/home/Guyzer/Firsty/app/views.py", line 159, in <module>
+2025-11-21 04:53:28,930:     appbuilder.add_view(ContactModelView, "List Contacts", icon="fa-envelope", category="Contacts")
+2025-11-21 04:53:28,930: 
+2025-11-21 04:53:28,930:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/base.py", line 440, in add_view
+2025-11-21 04:53:28,931:     baseview = self._check_and_init(baseview)
+2025-11-21 04:53:28,931: 
+2025-11-21 04:53:28,931:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/base.py", line 358, in _check_and_init
+2025-11-21 04:53:28,931:     baseview = baseview()
+2025-11-21 04:53:28,932: 
+2025-11-21 04:53:28,932:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/views.py", line 526, in __init__
+2025-11-21 04:53:28,932:     super(ModelView, self).__init__(**kwargs)
+2025-11-21 04:53:28,932: 
+2025-11-21 04:53:28,933:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/views.py", line 179, in __init__
+2025-11-21 04:53:28,933:     super().__init__(**kwargs)
+2025-11-21 04:53:28,933: 
+2025-11-21 04:53:28,933:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/baseviews.py", line 859, in __init__
+2025-11-21 04:53:28,933:     super(BaseCRUDView, self).__init__(**kwargs)
+2025-11-21 04:53:28,934: 
+2025-11-21 04:53:28,934:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/baseviews.py", line 595, in __init__
+2025-11-21 04:53:28,934:     self._init_forms()
+2025-11-21 04:53:28,934: 
+2025-11-21 04:53:28,934:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/baseviews.py", line 885, in _init_forms
+2025-11-21 04:53:28,935:     self.add_form = conv.create_form(
+2025-11-21 04:53:28,935: 
+2025-11-21 04:53:28,935:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/forms.py", line 309, in create_form
+2025-11-21 04:53:28,935:     self._convert_col(
+2025-11-21 04:53:28,936: 
+2025-11-21 04:53:28,936:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/forms.py", line 262, in _convert_col
+2025-11-21 04:53:28,936:     return self._convert_simple(
+2025-11-21 04:53:28,936: 
+2025-11-21 04:53:28,936:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/forms.py", line 215, in _convert_simple
+2025-11-21 04:53:28,937:     default_value = self.datamodel.get_col_default(col_name)
+2025-11-21 04:53:28,937: 
+2025-11-21 04:53:28,937:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/models/sqla/interface.py", line 851, in get_col_default
+2025-11-21 04:53:28,937:     default = getattr(self.list_columns[col_name], "default", None)
+2025-11-21 04:53:28,937: ***************************************************
+2025-11-21 04:53:28,938: If you're seeing an import error and don't know why,
+2025-11-21 04:53:28,938: we have a dedicated help page to help you debug: 
+2025-11-21 04:53:28,938: https://help.pythonanywhere.com/pages/DebuggingImportError/
+2025-11-21 04:53:28,938: ***************************************************
+2025-11-21 04:53:29,959: Error running WSGI application
+2025-11-21 04:53:29,960: KeyError: 'gender'
+2025-11-21 04:53:29,960:   File "/var/www/guyzer_pythonanywhere_com_wsgi.py", line 53, in <module>
+2025-11-21 04:53:29,960:     from app import app as application  # noqa
+2025-11-21 04:53:29,960: 
+2025-11-21 04:53:29,960:   File "/home/Guyzer/Firsty/app/__init__.py", line 56, in <module>
+2025-11-21 04:53:29,960:     from . import views
+2025-11-21 04:53:29,960: 
+2025-11-21 04:53:29,961:   File "/home/Guyzer/Firsty/app/views.py", line 159, in <module>
+2025-11-21 04:53:29,961:     appbuilder.add_view(ContactModelView, "List Contacts", icon="fa-envelope", category="Contacts")
+2025-11-21 04:53:29,961: 
+2025-11-21 04:53:29,961:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/base.py", line 440, in add_view
+2025-11-21 04:53:29,961:     baseview = self._check_and_init(baseview)
+2025-11-21 04:53:29,961: 
+2025-11-21 04:53:29,962:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/base.py", line 358, in _check_and_init
+2025-11-21 04:53:29,962:     baseview = baseview()
+2025-11-21 04:53:29,962: 
+2025-11-21 04:53:29,962:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/views.py", line 526, in __init__
+2025-11-21 04:53:29,962:     super(ModelView, self).__init__(**kwargs)
+2025-11-21 04:53:29,962: 
+2025-11-21 04:53:29,963:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/views.py", line 179, in __init__
+2025-11-21 04:53:29,963:     super().__init__(**kwargs)
+2025-11-21 04:53:29,963: 
+2025-11-21 04:53:29,963:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/baseviews.py", line 859, in __init__
+2025-11-21 04:53:29,963:     super(BaseCRUDView, self).__init__(**kwargs)
+2025-11-21 04:53:29,963: 
+2025-11-21 04:53:29,963:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/baseviews.py", line 595, in __init__
+2025-11-21 04:53:29,964:     self._init_forms()
+2025-11-21 04:53:29,964: 
+2025-11-21 04:53:29,964:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/baseviews.py", line 885, in _init_forms
+2025-11-21 04:53:29,964:     self.add_form = conv.create_form(
+2025-11-21 04:53:29,964: 
+2025-11-21 04:53:29,964:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/forms.py", line 309, in create_form
+2025-11-21 04:53:29,964:     self._convert_col(
+2025-11-21 04:53:29,964: 
+2025-11-21 04:53:29,964:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/forms.py", line 262, in _convert_col
+2025-11-21 04:53:29,965:     return self._convert_simple(
+2025-11-21 04:53:29,965: 
+2025-11-21 04:53:29,965:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/forms.py", line 215, in _convert_simple
+2025-11-21 04:53:29,965:     default_value = self.datamodel.get_col_default(col_name)
+2025-11-21 04:53:29,965: 
+2025-11-21 04:53:29,965:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/models/sqla/interface.py", line 851, in get_col_default
+2025-11-21 04:53:29,965:     default = getattr(self.list_columns[col_name], "default", None)
+2025-11-21 04:53:29,966: ***************************************************
+2025-11-21 04:53:29,966: If you're seeing an import error and don't know why,
+2025-11-21 04:53:29,966: we have a dedicated help page to help you debug: 
+2025-11-21 04:53:29,966: https://help.pythonanywhere.com/pages/DebuggingImportError/
+2025-11-21 04:53:29,966: ***************************************************
+2025-11-21 04:53:31,267: Error running WSGI application
+2025-11-21 04:53:31,267: KeyError: 'gender'
+2025-11-21 04:53:31,268:   File "/var/www/guyzer_pythonanywhere_com_wsgi.py", line 53, in <module>
+2025-11-21 04:53:31,268:     from app import app as application  # noqa
+2025-11-21 04:53:31,268: 
+2025-11-21 04:53:31,268:   File "/home/Guyzer/Firsty/app/__init__.py", line 56, in <module>
+2025-11-21 04:53:31,268:     from . import views
+2025-11-21 04:53:31,269: 
+2025-11-21 04:53:31,269:   File "/home/Guyzer/Firsty/app/views.py", line 159, in <module>
+2025-11-21 04:53:31,269:     appbuilder.add_view(ContactModelView, "List Contacts", icon="fa-envelope", category="Contacts")
+2025-11-21 04:53:31,269: 
+2025-11-21 04:53:31,269:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/base.py", line 440, in add_view
+2025-11-21 04:53:31,270:     baseview = self._check_and_init(baseview)
+2025-11-21 04:53:31,270: 
+2025-11-21 04:53:31,270:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/base.py", line 358, in _check_and_init
+2025-11-21 04:53:31,270:     baseview = baseview()
+2025-11-21 04:53:31,270: 
+2025-11-21 04:53:31,271:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/views.py", line 526, in __init__
+2025-11-21 04:53:31,271:     super(ModelView, self).__init__(**kwargs)
+2025-11-21 04:53:31,271: 
+2025-11-21 04:53:31,271:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/views.py", line 179, in __init__
+2025-11-21 04:53:31,271:     super().__init__(**kwargs)
+2025-11-21 04:53:31,272: 
+2025-11-21 04:53:31,272:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/baseviews.py", line 859, in __init__
+2025-11-21 04:53:31,272:     super(BaseCRUDView, self).__init__(**kwargs)
+2025-11-21 04:53:31,272: 
+2025-11-21 04:53:31,272:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/baseviews.py", line 595, in __init__
+2025-11-21 04:53:31,272:     self._init_forms()
+2025-11-21 04:53:31,273: 
+2025-11-21 04:53:31,273:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/baseviews.py", line 885, in _init_forms
+2025-11-21 04:53:31,273:     self.add_form = conv.create_form(
+2025-11-21 04:53:31,273: 
+2025-11-21 04:53:31,273:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/forms.py", line 309, in create_form
+2025-11-21 04:53:31,274:     self._convert_col(
+2025-11-21 04:53:31,274: 
+2025-11-21 04:53:31,274:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/forms.py", line 262, in _convert_col
+2025-11-21 04:53:31,274:     return self._convert_simple(
+2025-11-21 04:53:31,274: 
+2025-11-21 04:53:31,275:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/forms.py", line 215, in _convert_simple
+2025-11-21 04:53:31,275:     default_value = self.datamodel.get_col_default(col_name)
+2025-11-21 04:53:31,275: 
+2025-11-21 04:53:31,275:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/models/sqla/interface.py", line 851, in get_col_default
+2025-11-21 04:53:31,275:     default = getattr(self.list_columns[col_name], "default", None)
+2025-11-21 04:53:31,276: ***************************************************
+2025-11-21 04:53:31,276: If you're seeing an import error and don't know why,
+2025-11-21 04:53:31,276: we have a dedicated help page to help you debug: 
+2025-11-21 04:53:31,276: https://help.pythonanywhere.com/pages/DebuggingImportError/
+2025-11-21 04:53:31,276: ***************************************************
+2025-11-21 04:53:39,752: Error running WSGI application
+2025-11-21 04:53:39,762: KeyError: 'gender'
+2025-11-21 04:53:39,762:   File "/var/www/guyzer_pythonanywhere_com_wsgi.py", line 53, in <module>
+2025-11-21 04:53:39,763:     from app import app as application  # noqa
+2025-11-21 04:53:39,763: 
+2025-11-21 04:53:39,763:   File "/home/Guyzer/Firsty/app/__init__.py", line 56, in <module>
+2025-11-21 04:53:39,763:     from . import views
+2025-11-21 04:53:39,763: 
+2025-11-21 04:53:39,763:   File "/home/Guyzer/Firsty/app/views.py", line 159, in <module>
+2025-11-21 04:53:39,763:     appbuilder.add_view(ContactModelView, "List Contacts", icon="fa-envelope", category="Contacts")
+2025-11-21 04:53:39,763: 
+2025-11-21 04:53:39,764:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/base.py", line 440, in add_view
+2025-11-21 04:53:39,764:     baseview = self._check_and_init(baseview)
+2025-11-21 04:53:39,764: 
+2025-11-21 04:53:39,764:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/base.py", line 358, in _check_and_init
+2025-11-21 04:53:39,764:     baseview = baseview()
+2025-11-21 04:53:39,764: 
+2025-11-21 04:53:39,764:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/views.py", line 526, in __init__
+2025-11-21 04:53:39,764:     super(ModelView, self).__init__(**kwargs)
+2025-11-21 04:53:39,765: 
+2025-11-21 04:53:39,765:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/views.py", line 179, in __init__
+2025-11-21 04:53:39,765:     super().__init__(**kwargs)
+2025-11-21 04:53:39,765: 
+2025-11-21 04:53:39,765:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/baseviews.py", line 859, in __init__
+2025-11-21 04:53:39,765:     super(BaseCRUDView, self).__init__(**kwargs)
+2025-11-21 04:53:39,765: 
+2025-11-21 04:53:39,766:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/baseviews.py", line 595, in __init__
+2025-11-21 04:53:39,766:     self._init_forms()
+2025-11-21 04:53:39,766: 
+2025-11-21 04:53:39,766:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/baseviews.py", line 885, in _init_forms
+2025-11-21 04:53:39,766:     self.add_form = conv.create_form(
+2025-11-21 04:53:39,766: 
+2025-11-21 04:53:39,766:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/forms.py", line 309, in create_form
+2025-11-21 04:53:39,766:     self._convert_col(
+2025-11-21 04:53:39,766: 
+2025-11-21 04:53:39,767:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/forms.py", line 262, in _convert_col
+2025-11-21 04:53:39,767:     return self._convert_simple(
+2025-11-21 04:53:39,767: 
+2025-11-21 04:53:39,767:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/forms.py", line 215, in _convert_simple
+2025-11-21 04:53:39,767:     default_value = self.datamodel.get_col_default(col_name)
+2025-11-21 04:53:39,767: 
+2025-11-21 04:53:39,767:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/models/sqla/interface.py", line 851, in get_col_default
+2025-11-21 04:53:39,767:     default = getattr(self.list_columns[col_name], "default", None)
+2025-11-21 04:53:39,768: ***************************************************
+2025-11-21 04:53:39,768: If you're seeing an import error and don't know why,
+2025-11-21 04:53:39,768: we have a dedicated help page to help you debug: 
+2025-11-21 04:53:39,768: https://help.pythonanywhere.com/pages/DebuggingImportError/
+2025-11-21 04:53:39,768: ***************************************************
+2025-11-21 04:53:40,106: Error running WSGI application
+2025-11-21 04:53:40,107: KeyError: 'gender'
+2025-11-21 04:53:40,107:   File "/var/www/guyzer_pythonanywhere_com_wsgi.py", line 53, in <module>
+2025-11-21 04:53:40,107:     from app import app as application  # noqa
+2025-11-21 04:53:40,108: 
+2025-11-21 04:53:40,108:   File "/home/Guyzer/Firsty/app/__init__.py", line 56, in <module>
+2025-11-21 04:53:40,108:     from . import views
+2025-11-21 04:53:40,108: 
+2025-11-21 04:53:40,108:   File "/home/Guyzer/Firsty/app/views.py", line 159, in <module>
+2025-11-21 04:53:40,108:     appbuilder.add_view(ContactModelView, "List Contacts", icon="fa-envelope", category="Contacts")
+2025-11-21 04:53:40,108: 
+2025-11-21 04:53:40,109:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/base.py", line 440, in add_view
+2025-11-21 04:53:40,109:     baseview = self._check_and_init(baseview)
+2025-11-21 04:53:40,109: 
+2025-11-21 04:53:40,109:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/base.py", line 358, in _check_and_init
+2025-11-21 04:53:40,109:     baseview = baseview()
+2025-11-21 04:53:40,109: 
+2025-11-21 04:53:40,109:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/views.py", line 526, in __init__
+2025-11-21 04:53:40,110:     super(ModelView, self).__init__(**kwargs)
+2025-11-21 04:53:40,110: 
+2025-11-21 04:53:40,110:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/views.py", line 179, in __init__
+2025-11-21 04:53:40,110:     super().__init__(**kwargs)
+2025-11-21 04:53:40,110: 
+2025-11-21 04:53:40,110:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/baseviews.py", line 859, in __init__
+2025-11-21 04:53:40,110:     super(BaseCRUDView, self).__init__(**kwargs)
+2025-11-21 04:53:40,111: 
+2025-11-21 04:53:40,111:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/baseviews.py", line 595, in __init__
+2025-11-21 04:53:40,111:     self._init_forms()
+2025-11-21 04:53:40,111: 
+2025-11-21 04:53:40,111:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/baseviews.py", line 885, in _init_forms
+2025-11-21 04:53:40,111:     self.add_form = conv.create_form(
+2025-11-21 04:53:40,111: 
+2025-11-21 04:53:40,112:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/forms.py", line 309, in create_form
+2025-11-21 04:53:40,112:     self._convert_col(
+2025-11-21 04:53:40,112: 
+2025-11-21 04:53:40,112:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/forms.py", line 262, in _convert_col
+2025-11-21 04:53:40,112:     return self._convert_simple(
+2025-11-21 04:53:40,112: 
+2025-11-21 04:53:40,112:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/forms.py", line 215, in _convert_simple
+2025-11-21 04:53:40,112:     default_value = self.datamodel.get_col_default(col_name)
+2025-11-21 04:53:40,112: 
+2025-11-21 04:53:40,113:   File "/home/Guyzer/.virtualenvs/myvirtualenv/lib/python3.10/site-packages/flask_appbuilder/models/sqla/interface.py", line 851, in get_col_default
+2025-11-21 04:53:40,113:     default = getattr(self.list_columns[col_name], "default", None)
+2025-11-21 04:53:40,113: ***************************************************
+2025-11-21 04:53:40,113: If you're seeing an import error and don't know why,
+2025-11-21 04:53:40,113: we have a dedicated help page to help you debug: 
+2025-11-21 04:53:40,113: https://help.pythonanywhere.com/pages/DebuggingImportError/
+2025-11-21 04:53:40,113: ***************************************************

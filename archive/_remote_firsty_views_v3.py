@@ -336,6 +336,7 @@ class CasiView(BaseView):
     default_view = "tool"
 
     @expose('/', methods=['GET', 'POST'])
+    @has_access
     def tool(self):
         if 'casi_thread' not in session:
             session['casi_thread'] = []
