@@ -1,3 +1,4 @@
+import json
 import gradio as gr
 import os
 import tempfile
@@ -7,6 +8,56 @@ import webCASI as casi
 
 # Simple Gradio wrapper around webCASI's generator/critic/run_automatic_cycle.
 # This is an initial scaffold; we will expand it with full controls and HF-ready behavior.
+
+
+def meta_reviewer(backend, model, history, gen_prompt, crit_prompt, api_key):
+    """
+    Analyzes the recent history and updates system prompts to improve collaboration.
+    """
+    # Only look at the most recent interaction pair to save context
+    recent_history = history[-1:] if history else []
+    history_text = casi.format_history_as_text(recent_history)
+    
+    meta_prompt = f"""
+    You are a Meta-Reviewer optimizing a collaboration between a Generator and a Critic.
+    
+    Current Generator Prompt: "{gen_prompt}"
+    Current Critic Prompt: "{crit_prompt}"
+    
+    Most Recent Interaction:
+    {history_text}
+    
+    Analyze the dynamic:
+    1. Is the Critic being specific enough?
+    2. Is the Generator truly addressing the critique or just restating?
+    3. Are they stuck in a loop?
+    
+    Based on this, PROVIDE IMPROVED SYSTEM PROMPTS for the next turn.
+    - If the Generator is vague, tell it to be concrete.
+    - If the Critic is nitpicking, tell it to be constructive.
+    - If they are doing well, you can keep the prompts mostly the same but encourage deeper depth.
+    
+    Respond STRICTLY in JSON format:
+    {{
+        "thought_process": "Brief explanation of your changes...",
+        "generator_prompt": "New generator system prompt...",
+        "critic_prompt": "New critic system prompt..."
+    }}
+    """
+    
+    try:
+        response = casi.generate_response(backend, model, meta_prompt, "", api_key=api_key)
+        # Attempt to extract and parse JSON
+        start = response.find('{')
+        end = response.rfind('}') + 1
+        if start != -1 and end != 0:
+            json_str = response[start:end]
+            data = json.loads(json_str)
+            return data.get("generator_prompt", gen_prompt), data.get("critic_prompt", crit_prompt), data.get("thought_process", "No change.")
+    except Exception as e:
+        print(f"Meta-Reviewer failed: {e}")
+    
+    return gen_prompt, crit_prompt, "Meta-Reviewer failed to parse or generate."
 
 
 def run_generator(backend, model, generator_prompt, generator_input, critic_output,
@@ -116,12 +167,12 @@ def run_critic(backend, model, critic_prompt, critic_input,
 
 
 def run_cycle(backend, model, generator_prompt, initial_input, critic_prompt,
-              max_iterations, openai_key, anthropic_key, openrouter_key,
+              max_iterations, enable_meta, openai_key, anthropic_key, openrouter_key,
               history: List[Dict[str, Any]]):
-    """Run the full automatic Generator/Critic cycle via casi.run_automatic_cycle.
-
-    Returns final generator output, final critic output, and a simple
-    plain-text summary of the iteration history.
+    """Run the full automatic Generator/Critic cycle.
+    
+    If enable_meta is True, it uses a custom loop with a Meta-Reviewer agent
+    that updates system prompts dynamically between iterations.
     """
 
     # Select API key based on backend (both agents use the same backend here).
@@ -137,32 +188,91 @@ def run_cycle(backend, model, generator_prompt, initial_input, critic_prompt,
     if not model:
         model = getattr(casi.config, f"{backend}_model", None)
 
-    results = casi.run_automatic_cycle(
-        max_iterations=max_iterations,
-        initial_input=initial_input,
-        gen_backend=backend,
-        gen_model=model,
-        gen_prompt=generator_prompt,
-        gen_api_key=api_key,
-        crit_backend=backend,
-        crit_model=model,
-        crit_prompt=critic_prompt,
-        crit_api_key=api_key,
-    )
+    cycle_history = []
+    final_gen = ""
+    final_crit = ""
 
-    cycle_history: List[Dict[str, Any]] = results.get("history", [])
+    if not enable_meta:
+        # Standard Loop via webCASI
+        results = casi.run_automatic_cycle(
+            max_iterations=max_iterations,
+            initial_input=initial_input,
+            gen_backend=backend,
+            gen_model=model,
+            gen_prompt=generator_prompt,
+            gen_api_key=api_key,
+            crit_backend=backend,
+            crit_model=model,
+            crit_prompt=critic_prompt,
+            crit_api_key=api_key,
+        )
+        cycle_history = results.get("history", [])
+        final_gen = results.get("final_generator_output", "")
+        final_crit = results.get("final_critic_output", "")
+    else:
+        # Advanced Loop with Meta-Feedback
+        current_input = initial_input
+        critic_feedback = ""
+        curr_gen_prompt = generator_prompt
+        curr_crit_prompt = critic_prompt
+        
+        for i in range(max_iterations):
+            # --- Generator ---
+            if i == 0:
+                gen_input_text = current_input
+            else:
+                history_text = casi.format_history_as_text(cycle_history)
+                gen_input_text = f"ORIGINAL GOAL: {initial_input}\n\nPREVIOUS HISTORY:\n{history_text}\n\nLATEST CRITIQUE:\n{critic_feedback}"
+            
+            gen_out, _, gen_trace = casi.generator(backend, model, curr_gen_prompt, gen_input_text, "" if i>0 else critic_feedback, api_key)
+            
+            # --- Critic ---
+            if i == 0:
+                crit_input_text = gen_out
+            else:
+                history_text = casi.format_history_as_text(cycle_history)
+                crit_input_text = f"ORIGINAL GOAL: {initial_input}\n\nPREVIOUS HISTORY:\n{history_text}\n\nNEW DRAFT TO CRITIQUE:\n{gen_out}"
+            
+            crit_out, _, crit_trace = casi.critic(backend, model, curr_crit_prompt, crit_input_text, api_key)
+            
+            # Record Step
+            step_data = {
+                'iteration': i + 1,
+                'generator_input': current_input if i == 0 else "(From previous critique)",
+                'critic_feedback_input': critic_feedback,
+                'generator_output': gen_out,
+                'critic_output': crit_out,
+                'generator_trace': gen_trace,
+                'critic_trace': crit_trace
+            }
+            
+            # --- Meta-Feedback Step ---
+            if i < max_iterations - 1:
+                curr_gen_prompt, curr_crit_prompt, thought = meta_reviewer(backend, model, [step_data], curr_gen_prompt, curr_crit_prompt, api_key)
+                step_data['meta_feedback'] = thought
+                step_data['next_gen_prompt'] = curr_gen_prompt
+                step_data['next_crit_prompt'] = curr_crit_prompt
+
+            cycle_history.append(step_data)
+            critic_feedback = crit_out
+            current_input = ""
+            
+        final_gen = gen_out
+        final_crit = crit_out
 
     # Extend unified history with automatic cycle steps (generator + critic per iteration)
     new_history = list(history or [])
     for step in cycle_history:
         it = step.get("iteration")
+        meta_note = step.get("meta_feedback", "")
+        
         new_history.append({
             "step_type": "generator",
             "mode": "automatic",
             "iteration": it,
             "backend": backend,
             "model": model,
-            "prompt": generator_prompt,
+            "prompt": step.get("next_gen_prompt", generator_prompt), # Approximation
             "input": step.get("generator_input", ""),
             "output": step.get("generator_output", ""),
         })
@@ -172,26 +282,30 @@ def run_cycle(backend, model, generator_prompt, initial_input, critic_prompt,
             "iteration": it,
             "backend": backend,
             "model": model,
-            "prompt": critic_prompt,
+            "prompt": step.get("next_crit_prompt", critic_prompt),
             "input": step.get("generator_output", ""),
             "output": step.get("critic_output", ""),
+            "meta_feedback": meta_note
         })
 
     # Build a compact text summary for display in Gradio from cycle_history
     lines = []
     for step in cycle_history:
         it = step.get("iteration")
+        meta = step.get("meta_feedback")
         lines.append(f"=== Iteration {it} ===")
         lines.append("Generator output:\n" + step.get("generator_output", ""))
         lines.append("")
         lines.append("Critic output:\n" + step.get("critic_output", ""))
+        if meta:
+             lines.append(f"\n[Meta-Reviewer]: {meta}")
         lines.append("\n" + "-" * 40 + "\n")
 
     history_text = "\n".join(lines) if lines else "(No history recorded)"
 
     return (
-        results.get("final_generator_output", ""),
-        results.get("final_critic_output", ""),
+        final_gen,
+        final_crit,
         history_text,
         new_history,
     )
@@ -281,6 +395,7 @@ You can select a backend (including OpenRouter) and optionally provide per-sessi
                 step=1,
                 label="Max Iterations (Automatic Cycle)",
             )
+            enable_meta = gr.Checkbox(label="Enable Meta-Feedback (Experimental)", value=False)
             cycle_button = gr.Button("Run Full Automatic Cycle")
         with gr.Column():
             cycle_gen_final = gr.Textbox(
@@ -322,7 +437,7 @@ You can select a backend (including OpenRouter) and optionally provide per-sessi
     cycle_button.click(
         fn=run_cycle,
         inputs=[backend, model, generator_prompt, generator_input, critic_prompt,
-                max_iterations, openai_key, anthropic_key, openrouter_key, history_state],
+                max_iterations, enable_meta, openai_key, anthropic_key, openrouter_key, history_state],
         outputs=[cycle_gen_final, cycle_crit_final, cycle_history_text, history_state],
     )
 
