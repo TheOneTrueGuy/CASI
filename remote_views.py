@@ -517,6 +517,7 @@ class CasiView(BaseView):
                 casi_state['casi_last_gen_output'] = gen_output
                 casi_state['casi_last_gen_trace'] = gen_trace
                 casi_state['casi_auto_next'] = 'critic'
+                casi_state['casi_auto_active'] = False # Manual intervention stops auto-cycle
                 save_context_to_session(casi_state)
 
             elif action == 'run_critic':
@@ -564,6 +565,7 @@ class CasiView(BaseView):
                 # Update State
                 casi_state['casi_last_critic_feedback'] = crit_output
                 casi_state['casi_auto_next'] = 'generator'
+                casi_state['casi_auto_active'] = False # Manual intervention stops auto-cycle
                 save_context_to_session(casi_state)
                 
                 # UX Improvement: Automatically switch Generator prompt to "Iteration Mode"
