@@ -2,6 +2,7 @@ import openai
 import os
 import json
 import logging
+import sys
 from dotenv import load_dotenv
 from typing import Tuple, List, Dict, Any, Literal
 import time
@@ -140,12 +141,12 @@ def generate_response(backend: Literal["openai", "anthropic", "google", "groq", 
         full_prompt += f"\n\nPrevious Critique: {critique}"
 
     # Log the attempt start to server logs
-    print(f"DEBUG: Generating response using {backend} (Model: {model}) - Attempt start.")
+    print(f"DEBUG: Generating response using {backend} (Model: {model}) - Attempt start.", file=sys.stderr)
 
     while attempt < config.max_retries:
         try:
             if backend == "openai":
-                print(f"DEBUG: Calling OpenAI API... (Timeout 90s)")
+                print(f"DEBUG: Calling OpenAI API... (Timeout 90s)", file=sys.stderr)
                 # Use user's key if provided, otherwise fall back to server config
                 key = api_key if api_key else config.openai_api_key
                 if not key: raise ValueError("OpenAI API key not found.")
@@ -157,11 +158,11 @@ def generate_response(backend: Literal["openai", "anthropic", "google", "groq", 
                     temperature=config.temperature,
                     timeout=90.0
                 )
-                print("DEBUG: OpenAI Response Received.")
+                print("DEBUG: OpenAI Response Received.", file=sys.stderr)
                 return response.choices[0].message.content
 
             elif backend == "openrouter":
-                print(f"DEBUG: Calling OpenRouter API... (Timeout 90s)")
+                print(f"DEBUG: Calling OpenRouter API... (Timeout 90s)", file=sys.stderr)
                 # OpenRouter uses OpenAI SDK with custom base_url
                 key = api_key if api_key else config.openrouter_api_key
                 if not key: raise ValueError("OpenRouter API key not found.")
@@ -185,11 +186,11 @@ def generate_response(backend: Literal["openai", "anthropic", "google", "groq", 
                     extra_headers=extra_headers,
                     timeout=90.0
                 )
-                print("DEBUG: OpenRouter Response Received.")
+                print("DEBUG: OpenRouter Response Received.", file=sys.stderr)
                 return response.choices[0].message.content
 
             elif backend == "anthropic":
-                print(f"DEBUG: Calling Anthropic API... (Timeout 90s)")
+                print(f"DEBUG: Calling Anthropic API... (Timeout 90s)", file=sys.stderr)
                 if not anthropic: raise ImportError("Anthropic SDK not installed.")
                 key = api_key if api_key else config.anthropic_api_key
                 if not key: raise ValueError("Anthropic API key not found.")
@@ -201,11 +202,11 @@ def generate_response(backend: Literal["openai", "anthropic", "google", "groq", 
                     messages=[{"role": "user", "content": full_prompt}],
                     timeout=90.0
                 )
-                print("DEBUG: Anthropic Response Received.")
+                print("DEBUG: Anthropic Response Received.", file=sys.stderr)
                 return "".join([c.text for c in response.content if hasattr(c, 'text')])
 
             elif backend == "google":
-                print(f"DEBUG: Calling Google API...")
+                print(f"DEBUG: Calling Google API...", file=sys.stderr)
                 # Google's SDK is configured globally, so we don't support user keys for it at this time
                 # to avoid thread-safety issues. It will use the server's key.
                 if not genai: raise ImportError("Google Generative AI SDK not installed.")
@@ -215,7 +216,7 @@ def generate_response(backend: Literal["openai", "anthropic", "google", "groq", 
                 return response.text
             
             elif backend == "ollama":
-                print(f"DEBUG: Calling Ollama API...")
+                print(f"DEBUG: Calling Ollama API...", file=sys.stderr)
                 if not ollama_client: raise ImportError("Ollama SDK not installed or client not initialized.")
                 response = ollama_client.chat(
                     model=model,
@@ -232,7 +233,7 @@ def generate_response(backend: Literal["openai", "anthropic", "google", "groq", 
                 raise NotImplementedError(f"Backend '{backend}' is not yet implemented or supported for user keys.")
 
         except Exception as e:
-            print(f"Error on attempt {attempt+1} with {backend}: {e}")
+            print(f"Error on attempt {attempt+1} with {backend}: {e}", file=sys.stderr)
             attempt += 1
             if attempt >= config.max_retries:
                 return f"Error: Failed to get response from {backend} after {config.max_retries} attempts. Details: {e}"
