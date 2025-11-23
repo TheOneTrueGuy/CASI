@@ -1,5 +1,13 @@
 # CASI Project Changelog
 
+## [2025-11-22] - Public Access & Cleanup
+- **Public Access**: 
+  - Modified `views.py` (deployed) to remove the login requirement for the CASI tool (`@has_access` decorator removed).
+  - The CASI page is now accessible to the general public.
+- **Cleanup**:
+  - Archived all `_remote_*` files to the `archive/` directory to declutter the project root.
+  - Created `remote_views.py` as the canonical local copy of the deployed `views.py`.
+
 ## [2025-11-20] - Progress Round-Up
 
 ### Core Logic & Backend
