@@ -397,6 +397,26 @@ class CasiView(BaseView):
             
             with open(f"/tmp/casi_trace_{trace_id}.json", "w") as f:
                 json.dump(history, f)
+
+        def load_context_from_session():
+            trace_id = session.get('casi_trace_id')
+            if trace_id and os.path.exists(f"/tmp/casi_context_{trace_id}.json"):
+                try:
+                    with open(f"/tmp/casi_context_{trace_id}.json", "r") as f:
+                        return json.load(f)
+                except:
+                    return {}
+            return {}
+
+        def save_context_to_session(ctx_data):
+            trace_id = session.get('casi_trace_id')
+            if not trace_id:
+                trace_id = str(uuid.uuid4())
+                session['casi_trace_id'] = trace_id
+            
+            with open(f"/tmp/casi_context_{trace_id}.json", "w") as f:
+                json.dump(ctx_data, f)
+
             return trace_id
 
         if request.method == 'POST':
@@ -435,8 +455,9 @@ class CasiView(BaseView):
                 flash('API keys updated.', 'info')
 
             elif action == 'run_generator':
-                # Load existing history
+                # Load existing history & state
                 history = load_history_from_session()
+                casi_state = load_context_from_session()
                 
                 api_key = None
                 if context['selected_gen_backend'] == 'openai': api_key = session.get('openai_api_key')
@@ -450,19 +471,16 @@ class CasiView(BaseView):
                     if context['selected_gen_backend'] == 'openrouter' and (not gen_model or 'deepseek' in gen_model):
                         gen_model = 'qwen/qwen3-32b'
 
-                # Prepare Input with Context from History
-                initial_input = session.get('casi_initial_input', context['generator_input']) # Use session or current input
-                if not session.get('casi_initial_input'): session['casi_initial_input'] = initial_input # Save if new
+                # Prepare Input with Context from State
+                initial_input = casi_state.get('casi_initial_input', context['generator_input'])
+                if not casi_state.get('casi_initial_input'): casi_state['casi_initial_input'] = initial_input
                 
-                critic_feedback = session.get('casi_last_critic_feedback', context['critic_output'])
+                critic_feedback = casi_state.get('casi_last_critic_feedback', context['critic_output'])
                 history_text = casi.format_history_as_text(history)
                 
                 # Construct prompt/input
                 current_gen_prompt = context['generator_prompt']
-                # Note: We don't auto-switch prompt in manual mode unless user asks, but we could.
-                # For consistency, we'll use the prompt exactly as in the text box.
                 
-                # If history exists, we should augment the input
                 gen_input_text = context['generator_input']
                 if history:
                      gen_input_text = f"ORIGINAL GOAL: {initial_input}\n\nPREVIOUS HISTORY:\n{history_text}\n\nLATEST CRITIQUE:\n{critic_feedback}\n\nCURRENT TASK:\n{context['generator_input']}"
@@ -472,7 +490,7 @@ class CasiView(BaseView):
                     model=gen_model,
                     prompt=current_gen_prompt,
                     user_input=gen_input_text,
-                    critic_feedback="", # Context embedded
+                    critic_feedback="", 
                     api_key=api_key
                 )
                 
@@ -480,7 +498,6 @@ class CasiView(BaseView):
                 context['critic_input'] = gen_output
                 
                 # Update History
-                # If last item is incomplete (no critic output), update it. Else append new.
                 if history and not history[-1].get('critic_output'):
                     history[-1]['generator_output'] = gen_output
                     history[-1]['generator_trace'] = gen_trace
@@ -496,21 +513,23 @@ class CasiView(BaseView):
                     })
                 save_history_to_session(history)
                 
-                # Update Session State for consistency with Auto Mode
-                session['casi_last_gen_output'] = gen_output
-                session['casi_last_gen_trace'] = gen_trace
-                session['casi_auto_next'] = 'critic' # Next logical step is critic
+                # Update State
+                casi_state['casi_last_gen_output'] = gen_output
+                casi_state['casi_last_gen_trace'] = gen_trace
+                casi_state['casi_auto_next'] = 'critic'
+                save_context_to_session(casi_state)
 
             elif action == 'run_critic':
-                # Load existing history
+                # Load existing history & state
                 history = load_history_from_session()
+                casi_state = load_context_from_session()
 
                 api_key = None
                 if context['selected_crit_backend'] == 'openai': api_key = session.get('openai_api_key')
                 elif context['selected_crit_backend'] == 'anthropic': api_key = session.get('anthropic_api_key')
                 elif context['selected_crit_backend'] == 'openrouter': api_key = session.get('openrouter_api_key')
 
-                # Determine model to use (override or default)
+                # Determine model to use
                 crit_model = context.get('crit_model_id')
                 if not crit_model: 
                     crit_model = getattr(casi.config, f"{context['selected_crit_backend']}_model", None)
@@ -527,12 +546,10 @@ class CasiView(BaseView):
                 context['critic_output'] = crit_output
                 
                 # Update History
-                # If last item is incomplete, update it. Else append new (weird but possible).
                 if history and not history[-1].get('critic_output'):
                     history[-1]['critic_output'] = crit_output
                     history[-1]['critic_trace'] = crit_trace
                 else:
-                    # Orphaned critique
                     history.append({
                         'iteration': len(history) + 1,
                         'generator_input': "(Manual Critique Only)",
@@ -544,9 +561,10 @@ class CasiView(BaseView):
                     })
                 save_history_to_session(history)
                 
-                # Update Session State
-                session['casi_last_critic_feedback'] = crit_output
-                session['casi_auto_next'] = 'generator' # Next logical step is generator
+                # Update State
+                casi_state['casi_last_critic_feedback'] = crit_output
+                casi_state['casi_auto_next'] = 'generator'
+                save_context_to_session(casi_state)
                 
                 # UX Improvement: Automatically switch Generator prompt to "Iteration Mode"
                 current_gen_prompt = context.get('generator_prompt', '').strip()
@@ -557,16 +575,13 @@ class CasiView(BaseView):
                     context['generator_prompt'] = iter_gen_prompt
                     flash("Generator prompt updated to 'Iteration Mode' for the next turn.", "info")
 
+
             elif action == 'run_cycle' or action == 'step_cycle':
                 # Common parameter setup
                 try:
                     max_iterations = int(request.form.get('max_iterations', 5))
                     if not (1 <= max_iterations <= 20): max_iterations = 5
                 except (ValueError, TypeError): max_iterations = 5
-                
-                # ... (Key/Model setup same as before, handled by shared code below if I merge)
-                # Since I am replacing the block, I need to keep the key/model logic here or deduplicate.
-                # I will keep it inline for safety.
                 
                 # Get keys
                 gen_api_key = None
@@ -594,11 +609,10 @@ class CasiView(BaseView):
 
                 # --- Cycle Logic ---
                 history = load_history_from_session()
+                casi_state = load_context_from_session()
                 
                 if action == 'run_cycle':
                     # START or RESUME
-                    # If history exists, we resume. If empty, we start fresh.
-                    
                     if not history:
                         # Fresh Start
                         new_trace_id = str(uuid.uuid4())
@@ -607,10 +621,12 @@ class CasiView(BaseView):
                         history = []
                         save_history_to_session(history)
                         
-                        session['casi_auto_iter'] = 1
-                        session['casi_auto_next'] = 'critic' # Will run Generator below, so next is critic
-                        session['casi_initial_input'] = context['generator_input']
-                        session['casi_last_critic_feedback'] = ""
+                        # Initialize State
+                        casi_state = {}
+                        casi_state['casi_auto_iter'] = 1
+                        casi_state['casi_auto_next'] = 'critic'
+                        casi_state['casi_initial_input'] = context['generator_input']
+                        casi_state['casi_last_critic_feedback'] = ""
                         
                         flash(f"Automatic Cycle Started (Round 1/{max_iterations}). Generator is thinking...", "info")
                         gen_output, _, gen_trace = casi.generator(
@@ -624,11 +640,13 @@ class CasiView(BaseView):
                         
                         context['generator_output'] = gen_output
                         context['critic_input'] = gen_output
-                        session['casi_last_gen_output'] = gen_output
-                        session['casi_last_gen_trace'] = gen_trace
                         
-                        session['casi_auto_active'] = True
-                        session['casi_auto_max'] = max_iterations
+                        casi_state['casi_last_gen_output'] = gen_output
+                        casi_state['casi_last_gen_trace'] = gen_trace
+                        casi_state['casi_auto_active'] = True
+                        casi_state['casi_auto_max'] = max_iterations
+                        
+                        save_context_to_session(casi_state)
                         context['auto_continue'] = True
                         
                     else:
@@ -638,50 +656,46 @@ class CasiView(BaseView):
                         
                         if not last_item.get('critic_output'):
                             # Incomplete iteration (Generator ran, Critic pending)
-                            session['casi_auto_next'] = 'critic'
-                            session['casi_auto_iter'] = current_iter
-                            session['casi_last_gen_output'] = last_item.get('generator_output', '')
-                            session['casi_last_gen_trace'] = last_item.get('generator_trace', {})
-                            # Ensure context is synced
+                            casi_state['casi_auto_next'] = 'critic'
+                            casi_state['casi_auto_iter'] = current_iter
+                            casi_state['casi_last_gen_output'] = last_item.get('generator_output', '')
+                            casi_state['casi_last_gen_trace'] = last_item.get('generator_trace', {})
+                            
                             context['generator_output'] = last_item.get('generator_output', '')
                             context['critic_input'] = last_item.get('generator_output', '')
                             
                         else:
-                            # Complete iteration (Critic ran, Generator pending for next)
-                            session['casi_auto_next'] = 'generator'
-                            session['casi_auto_iter'] = current_iter + 1
-                            session['casi_last_critic_feedback'] = last_item.get('critic_output', '')
-                            session['casi_initial_input'] = history[0].get('generator_input', '') # Try to recover initial
+                            # Complete iteration
+                            casi_state['casi_auto_next'] = 'generator'
+                            casi_state['casi_auto_iter'] = current_iter + 1
+                            casi_state['casi_last_critic_feedback'] = last_item.get('critic_output', '')
+                            casi_state['casi_initial_input'] = history[0].get('generator_input', '')
                         
                         # Resume
-                        session['casi_auto_active'] = True
-                        # If resuming, ensure max_iterations is at least current + user request, or just user request as target?
-                        # Let's treat input as "Target Max". If current is 3 and target is 5, we do 2 more.
-                        # If target <= current, we just stop (or do 1?). Let's do at least 1 step if clicked.
-                        if max_iterations <= session['casi_auto_iter']:
-                             max_iterations = session['casi_auto_iter'] + 1
+                        casi_state['casi_auto_active'] = True
+                        if max_iterations <= casi_state.get('casi_auto_iter', 1):
+                             max_iterations = casi_state.get('casi_auto_iter', 1) + 1
                              
-                        session['casi_auto_max'] = max_iterations
+                        casi_state['casi_auto_max'] = max_iterations
+                        save_context_to_session(casi_state)
                         
-                        flash(f"Resuming Automatic Cycle at Round {session['casi_auto_iter']}/{max_iterations}...", "info")
-                        context['auto_continue'] = True # Trigger step_cycle immediately
+                        flash(f"Resuming Automatic Cycle at Round {casi_state['casi_auto_iter']}/{max_iterations}...", "info")
+                        context['auto_continue'] = True
 
                 elif action == 'step_cycle':
-                    # CONTINUE: Execute next step based on session state
-                    if not session.get('casi_auto_active'):
+                    # CONTINUE
+                    if not casi_state.get('casi_auto_active'):
                         flash("Automatic cycle stopped or invalid state.", "warning")
                     else:
-                        history = load_history_from_session()
-                        current_iter = session.get('casi_auto_iter', 1)
-                        max_iter = session.get('casi_auto_max', 5)
-                        next_role = session.get('casi_auto_next', 'generator')
+                        current_iter = casi_state.get('casi_auto_iter', 1)
+                        max_iter = casi_state.get('casi_auto_max', 5)
+                        next_role = casi_state.get('casi_auto_next', 'generator')
                         
                         if next_role == 'critic':
                             # Run Critic
                             flash(f"Round {current_iter}/{max_iter}: Critic is thinking...", "info")
-                            crit_input = session.get('casi_last_gen_output', '')
+                            crit_input = casi_state.get('casi_last_gen_output', '')
                             
-                            # Use iteration prompt if available
                             current_crit_prompt = context['critic_prompt']
                             if current_iter > 1:
                                 iter_prompt = casi.config.prompts.get("critic_iteration")
@@ -696,73 +710,71 @@ class CasiView(BaseView):
                                 api_key=crit_api_key
                             )
                             
-                            # Save Iteration to History
                             history.append({
                                 'iteration': current_iter,
-                                'generator_input': session.get('casi_initial_input') if current_iter == 1 else "(From previous critique)",
-                                'critic_feedback_input': session.get('casi_last_critic_feedback', ''),
-                                'generator_output': session.get('casi_last_gen_output', ''),
+                                'generator_input': casi_state.get('casi_initial_input') if current_iter == 1 else "(From previous critique)",
+                                'critic_feedback_input': casi_state.get('casi_last_critic_feedback', ''),
+                                'generator_output': casi_state.get('casi_last_gen_output', ''),
                                 'critic_output': crit_output,
-                                'generator_trace': session.get('casi_last_gen_trace', {}),
+                                'generator_trace': casi_state.get('casi_last_gen_trace', {}),
                                 'critic_trace': crit_trace
                             })
                             save_history_to_session(history)
                             
-                            # Update State
-                            session['casi_last_critic_feedback'] = crit_output
+                            casi_state['casi_last_critic_feedback'] = crit_output
                             context['critic_output'] = crit_output
-                            context['generator_output'] = session.get('casi_last_gen_output', '') # Keep gen output visible
-                            context['critic_input'] = session.get('casi_last_gen_output', '')
+                            context['generator_output'] = casi_state.get('casi_last_gen_output', '')
+                            context['critic_input'] = casi_state.get('casi_last_gen_output', '')
                             
-                            # Check completion
                             if current_iter >= max_iter:
-                                session['casi_auto_active'] = False
+                                casi_state['casi_auto_active'] = False
                                 flash("Automatic cycle completed successfully.", "success")
                             else:
-                                session['casi_auto_iter'] = current_iter + 1
-                                session['casi_auto_next'] = 'generator'
-                                context['auto_continue'] = True # Trigger next step
+                                casi_state['casi_auto_iter'] = current_iter + 1
+                                casi_state['casi_auto_next'] = 'generator'
+                                context['auto_continue'] = True
+                            
+                            save_context_to_session(casi_state)
                         
                         elif next_role == 'generator':
                             # Run Generator
                             flash(f"Round {current_iter}/{max_iter}: Generator is thinking...", "info")
                             
-                            # Prepare Input
-                            initial_input = session.get('casi_initial_input', '')
-                            critic_feedback = session.get('casi_last_critic_feedback', '')
+                            initial_input = casi_state.get('casi_initial_input', '')
+                            critic_feedback = casi_state.get('casi_last_critic_feedback', '')
                             history_text = casi.format_history_as_text(history)
                             
-                            # Switch prompt to iteration mode
                             current_gen_prompt = context['generator_prompt']
                             iter_prompt = casi.config.prompts.get("generator_iteration")
                             if iter_prompt and current_gen_prompt == casi.config.prompts.get("generator_initial"):
                                 current_gen_prompt = iter_prompt
-                                context['generator_prompt'] = iter_prompt # Update display
+                                context['generator_prompt'] = iter_prompt
                             
                             gen_input_text = f"ORIGINAL GOAL: {initial_input}\n\nPREVIOUS HISTORY:\n{history_text}\n\nLATEST CRITIQUE:\n{critic_feedback}"
-                            context['generator_input'] = gen_input_text # Update display for context
+                            context['generator_input'] = gen_input_text
                             
                             gen_output, _, gen_trace = casi.generator(
                                 backend=context['selected_gen_backend'], 
                                 model=gen_model, 
                                 prompt=current_gen_prompt,
                                 user_input=gen_input_text, 
-                                critic_feedback="", # Context is embedded in input now
+                                critic_feedback="", 
                                 api_key=gen_api_key
                             )
                             
-                            # Update State
-                            session['casi_last_gen_output'] = gen_output
-                            session['casi_last_gen_trace'] = gen_trace
-                            session['casi_auto_next'] = 'critic'
+                            casi_state['casi_last_gen_output'] = gen_output
+                            casi_state['casi_last_gen_trace'] = gen_trace
+                            casi_state['casi_auto_next'] = 'critic'
                             
                             context['generator_output'] = gen_output
                             context['critic_input'] = gen_output
-                            context['critic_output'] = critic_feedback # Keep previous critique visible
+                            context['critic_output'] = critic_feedback
                             
-                            context['auto_continue'] = True # Trigger next step
+                            context['auto_continue'] = True
+                            save_context_to_session(casi_state)
 
                 context['cycle_history'] = history
+
 
         
         return self.render_template('casi.html', **context)
