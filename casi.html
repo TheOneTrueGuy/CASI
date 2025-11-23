@@ -62,23 +62,6 @@ anthropic_keys: {{ anthropic_keys }}
         </div>
         <hr>
         <div class="row">
-            <div class="col-md-12">
-                <h4><i class="fa fa-cogs"></i> Automatic Cycle</h4>
-            </div>
-            <div class="col-md-4">
-                <div class="form-group">
-                     <label for="max_iterations">Max Iterations:</label>
-                     <input type="number" class="form-control" name="max_iterations" value="{{ max_iterations or 5 }}" min="1" max="20">
-                </div>
-            </div>
-            <div class="col-md-8">
-                <div class="form-group" style="margin-top: 25px;">
-                    <button type="submit" name="action" value="run_cycle" class="btn btn-success btn-block">Run Full Automatic Cycle</button>
-                </div>
-            </div>
-        </div>
-        <hr>
-        <div class="row">
             <!-- Generator Column -->
             <div class="col-md-6">
                 <h4><i class="fa fa-lightbulb-o"></i> Generator</h4>
@@ -171,6 +154,26 @@ anthropic_keys: {{ anthropic_keys }}
                 </div>
             </div>
         </div>
+
+        <hr>
+        <div class="row">
+            <div class="col-md-12">
+                <h4><i class="fa fa-cogs"></i> Automatic Cycle</h4>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                     <label for="max_iterations">Max Iterations:</label>
+                     <input type="number" class="form-control" name="max_iterations" value="{{ max_iterations or 5 }}" min="1" max="20">
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="form-group" style="margin-top: 25px;">
+                    <button type="submit" name="action" value="run_cycle" class="btn btn-success btn-block">Run Full Automatic Cycle</button>
+                    <button type="submit" id="step_cycle_btn" name="action" value="step_cycle" style="display:none;">Step Cycle</button>
+                </div>
+            </div>
+        </div>
+
     </form>
 
     {% if cycle_history %}
@@ -198,25 +201,36 @@ anthropic_keys: {{ anthropic_keys }}
 
     <hr>
     <!-- Download trace section -->
-    <div class="row">
-        <div class="col-md-8">
-            <p>
-                <small>
-                    Download a text trace of the Generator/Critic conversation
-                    for this session.
-                </small>
-            </p>
+    <form method="POST">
+        <div class="row">
+            <div class="col-md-8">
+                <p>
+                    <small>
+                        Download a text trace of the Generator/Critic conversation
+                        for this session.
+                    </small>
+                </p>
+            </div>
+            <div class="col-md-4 text-right">
+                <button type="submit"
+                        name="action"
+                        value="download_trace"
+                        class="btn btn-primary"
+                        {% if not has_history %}disabled{% endif %}>
+                    Download Trace (Text)
+                </button>
+            </div>
         </div>
-        <div class="col-md-4 text-right">
-            <button type="submit"
-                    name="action"
-                    value="download_trace"
-                    class="btn btn-primary"
-                    {% if not has_history %}disabled{% endif %}>
-                Download Trace (Text)
-            </button>
-        </div>
-    </div>
+    </form>
+
+    {% if auto_continue %}
+    <script>
+        // Automatically trigger the next step after a short delay
+        setTimeout(function() {
+            document.getElementById('step_cycle_btn').click();
+        }, 1000);
+    </script>
+    {% endif %}
 
 </div>
 {% endblock %}
