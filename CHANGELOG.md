@@ -7,6 +7,9 @@
 - **Cleanup**:
   - Archived all `_remote_*` files to the `archive/` directory to declutter the project root.
   - Created `remote_views.py` as the canonical local copy of the deployed `views.py`.
+- **Bug Fixes**:
+  - **DeepSeek 404**: Fixed a bug in `remote_views.py` where the backend would incorrectly default to a broken DeepSeek model ID due to a legacy key name mismatch. Now explicitly defaults to `qwen/qwen3-32b` and respects user input.
+  - **Streamlit App**: Updated `app.py` to include Qwen in the dropdowns and properly handle empty model inputs.
 
 ## [2025-11-20] - Progress Round-Up
 

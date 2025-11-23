@@ -223,7 +223,7 @@ service_options = {
     "OpenAI": ["gpt-3.5-turbo", "gpt-4", "gpt-4o"],
     "Google Gemini": ["gemini-1.5-pro-latest", "gemini-pro"],
     "Anthropic Claude": ["claude-3-opus-20240229", "claude-3-sonnet-20240229"],
-    "OpenRouter": ["anthropic/claude-3-opus", "openai/gpt-4-turbo", "google/gemini-pro-1.5", "meta-llama/llama-3-70b-instruct"],
+    "OpenRouter": ["qwen/qwen3-32b", "anthropic/claude-3-opus", "openai/gpt-4-turbo", "google/gemini-pro-1.5", "meta-llama/llama-3-70b-instruct"],
     "Grok/Groq": ["llama3-8b-8192", "mixtral-8x7b-32768"],
 }
 
@@ -236,7 +236,7 @@ with col_gen:
     
     # Allow custom model input for OpenRouter or others
     if gen_service == "OpenRouter":
-        gen_model = st.text_input("Generator Model (OpenRouter ID)", value="anthropic/claude-3-opus", key="gen_model_custom")
+        gen_model = st.text_input("Generator Model (OpenRouter ID)", value=casi.config.openrouter_model, key="gen_model_custom")
     else:
         gen_model = st.selectbox("Generator Model", service_options[gen_service], key="gen_model")
     
@@ -252,6 +252,11 @@ with col_gen:
     if st.button("Run Generator"):
         backend = get_backend_from_service(gen_service)
         api_key = get_api_key_for_backend(backend)
+        
+        # Fallback to default model if empty
+        if not gen_model:
+            gen_model = getattr(casi.config, f"{backend}_model", None)
+
         
         # If resend and no previous output, use last input
         if gen_resend and not gen_output.strip() and thread:
@@ -301,6 +306,11 @@ with col_crit:
     if st.button("Run Critic"):
         backend = get_backend_from_service(crit_service)
         api_key = get_api_key_for_backend(backend)
+        
+        # Fallback to default model if empty
+        if not crit_model:
+            crit_model = getattr(casi.config, f"{backend}_model", None)
+
         
         # If resend and no previous output, use last input
         if crit_resend and not crit_output.strip() and thread:

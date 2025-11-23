@@ -507,10 +507,19 @@ class CasiView(BaseView):
                 elif context['selected_crit_backend'] == 'openrouter': crit_api_key = session.get('openrouter_api_key')
 
                 # Get models
-                gen_model = context.get('generator_model')
-                if not gen_model: gen_model = getattr(casi.config, f"{context['selected_gen_backend']}_model", None)
-                crit_model = context.get('critic_model')
-                if not crit_model: crit_model = getattr(casi.config, f"{context['selected_crit_backend']}_model", None)
+                gen_model = context.get('gen_model_id')
+                if not gen_model: 
+                    gen_model = getattr(casi.config, f"{context['selected_gen_backend']}_model", None)
+                    # Fallback hard default for OpenRouter if config is somehow wrong
+                    if context['selected_gen_backend'] == 'openrouter' and (not gen_model or 'deepseek' in gen_model):
+                        gen_model = 'qwen/qwen3-32b'
+                
+                crit_model = context.get('crit_model_id')
+                if not crit_model: 
+                    crit_model = getattr(casi.config, f"{context['selected_crit_backend']}_model", None)
+                    # Fallback hard default for OpenRouter
+                    if context['selected_crit_backend'] == 'openrouter' and (not crit_model or 'deepseek' in crit_model):
+                        crit_model = 'qwen/qwen3-32b'
 
                 # Run cycle
                 results = casi.run_automatic_cycle(
