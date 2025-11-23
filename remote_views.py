@@ -349,8 +349,8 @@ class CasiView(BaseView):
             session.modified = True
 
         prompts = {
-            "generator": "Formalize and expand this idea.",
-            "critic": "Analyze and critique this idea."
+            "generator": casi.config.prompts.get("generator_initial", "Formalize and expand this idea."),
+            "critic": casi.config.prompts.get("critic_initial", "Analyze and critique this idea.")
         }
         available_backends = ["openai", "anthropic", "google", "groq", "openrouter"]
         
@@ -521,6 +521,7 @@ class CasiView(BaseView):
                 casi_state['casi_auto_next'] = 'critic'
                 casi_state['casi_auto_active'] = False # Manual intervention stops auto-cycle
                 save_context_to_session(casi_state)
+                context['has_history'] = True
 
             elif action == 'run_critic':
                 # Load existing history & state
@@ -571,6 +572,7 @@ class CasiView(BaseView):
                 casi_state['casi_auto_next'] = 'generator'
                 casi_state['casi_auto_active'] = False # Manual intervention stops auto-cycle
                 save_context_to_session(casi_state)
+                context['has_history'] = True
                 
                 # UX Improvement: Automatically switch Generator prompt to "Iteration Mode"
                 current_gen_prompt = context.get('generator_prompt', '').strip()
@@ -730,6 +732,7 @@ class CasiView(BaseView):
                                 'critic_trace': crit_trace
                             })
                             save_history_to_session(history)
+                            context['has_history'] = True
                             
                             casi_state['casi_last_critic_feedback'] = crit_output
                             context['critic_output'] = crit_output
