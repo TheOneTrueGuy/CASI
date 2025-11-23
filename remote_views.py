@@ -352,7 +352,7 @@ class CasiView(BaseView):
             "generator": "Formalize and expand this idea.",
             "critic": "Analyze and critique this idea."
         }
-        available_backends = ["openai", "anthropic", "google", "openrouter"]
+        available_backends = ["openai", "anthropic", "google", "groq", "openrouter"]
         
         context = {
             "generator_prompt": prompts["generator"],
@@ -463,13 +463,15 @@ class CasiView(BaseView):
                 if context['selected_gen_backend'] == 'openai': api_key = session.get('openai_api_key')
                 elif context['selected_gen_backend'] == 'anthropic': api_key = session.get('anthropic_api_key')
                 elif context['selected_gen_backend'] == 'openrouter': api_key = session.get('openrouter_api_key')
-
+                
                 # Determine model to use (override or default)
                 gen_model = context.get('gen_model_id')
                 if not gen_model:
                     gen_model = getattr(casi.config, f"{context['selected_gen_backend']}_model", None)
                     if context['selected_gen_backend'] == 'openrouter' and (not gen_model or 'deepseek' in gen_model):
                         gen_model = 'qwen/qwen3-32b'
+                    elif context['selected_gen_backend'] == 'groq' and not gen_model:
+                        gen_model = 'llama3-8b-8192'
 
                 # Prepare Input with Context from State
                 initial_input = casi_state.get('casi_initial_input', context['generator_input'])
@@ -536,6 +538,8 @@ class CasiView(BaseView):
                     crit_model = getattr(casi.config, f"{context['selected_crit_backend']}_model", None)
                     if context['selected_crit_backend'] == 'openrouter' and (not crit_model or 'deepseek' in crit_model):
                         crit_model = 'qwen/qwen3-32b'
+                    elif context['selected_crit_backend'] == 'groq' and not crit_model:
+                        crit_model = 'llama3-8b-8192'
 
                 crit_output, _, crit_trace = casi.critic(
                     backend=context['selected_crit_backend'],
@@ -602,12 +606,16 @@ class CasiView(BaseView):
                     gen_model = getattr(casi.config, f"{context['selected_gen_backend']}_model", None)
                     if context['selected_gen_backend'] == 'openrouter' and (not gen_model or 'deepseek' in gen_model):
                         gen_model = 'qwen/qwen3-32b'
+                    elif context['selected_gen_backend'] == 'groq' and not gen_model:
+                        gen_model = 'llama3-8b-8192'
                 
                 crit_model = context.get('crit_model_id')
                 if not crit_model: 
                     crit_model = getattr(casi.config, f"{context['selected_crit_backend']}_model", None)
                     if context['selected_crit_backend'] == 'openrouter' and (not crit_model or 'deepseek' in crit_model):
                         crit_model = 'qwen/qwen3-32b'
+                    elif context['selected_crit_backend'] == 'groq' and not crit_model:
+                        crit_model = 'llama3-8b-8192'
 
                 # --- Cycle Logic ---
                 history = load_history_from_session()

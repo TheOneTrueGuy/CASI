@@ -189,6 +189,27 @@ def generate_response(backend: Literal["openai", "anthropic", "google", "groq", 
                 print("DEBUG: OpenRouter Response Received.", file=sys.stderr)
                 return response.choices[0].message.content
 
+            elif backend == "groq":
+                print(f"DEBUG: Calling Groq API... (Timeout 90s)", file=sys.stderr)
+                # Groq uses OpenAI SDK with custom base_url
+                key = api_key if api_key else config.groq_api_key
+                if not key: raise ValueError("Groq API key not found.")
+                
+                client = openai.OpenAI(
+                    base_url="https://api.groq.com/openai/v1",
+                    api_key=key,
+                )
+                
+                response = client.chat.completions.create(
+                    model=model,
+                    messages=[{"role": "user", "content": full_prompt}],
+                    max_tokens=config.max_tokens,
+                    temperature=config.temperature,
+                    timeout=90.0
+                )
+                print("DEBUG: Groq Response Received.", file=sys.stderr)
+                return response.choices[0].message.content
+
             elif backend == "anthropic":
                 print(f"DEBUG: Calling Anthropic API... (Timeout 90s)", file=sys.stderr)
                 if not anthropic: raise ImportError("Anthropic SDK not installed.")
