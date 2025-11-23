@@ -314,10 +314,13 @@ def generator(backend: str, model: str, prompt: str, user_input: str, critic_fee
         context = f"User Input: {user_input}\nCritique: {critic_feedback}"
         final_prompt, trace_data = agentic_step(backend, model, "Generator", prompt, context, api_key=api_key)
     
-    json_prompt = f"{final_prompt}. Please respond in JSON format with keys for 'response' and 'suggestions'."
-    raw_response = generate_response(backend, model, json_prompt, user_input, critic_feedback, api_key=api_key)
-    response_dict, _ = safe_parse_json(raw_response)
-    return response_dict.get('response', ''), response_dict.get('suggestions', []), trace_data
+    # requesting JSON is unnecessary as suggestions are unused and it causes display issues
+    # json_prompt = f"{final_prompt}. Please respond in JSON format with keys for 'response' and 'suggestions'."
+    
+    raw_response = generate_response(backend, model, final_prompt, user_input, critic_feedback, api_key=api_key)
+    
+    # Just return the raw response. Suggestions are empty.
+    return raw_response, [], trace_data
 
 def critic(backend: str, model: str, prompt: str, generator_output: str, api_key: str = None, use_search: bool = False) -> Tuple[str, List[str], Dict[str, Any]]:
     """Prepares prompt and calls generate_response for the Critic agent, passing the API key."""
