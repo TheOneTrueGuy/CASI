@@ -10,6 +10,8 @@
 - **Bug Fixes**:
   - **DeepSeek 404**: Fixed a bug in `remote_views.py` where the backend would incorrectly default to a broken DeepSeek model ID due to a legacy key name mismatch. Now explicitly defaults to `qwen/qwen3-32b` and respects user input.
   - **Streamlit App**: Updated `app.py` to include Qwen in the dropdowns and properly handle empty model inputs.
+- **Features**:
+  - **Visual Automatic Cycle**: Refactored the automatic cycle on the remote Flask app to execute step-by-step with page reloads. This allows the user to watch the Generator and Critic exchange unfold in real-time within the text boxes, rather than waiting for the entire batch to finish.
 
 ## [2025-11-20] - Progress Round-Up
 
