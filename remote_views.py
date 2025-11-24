@@ -362,11 +362,13 @@ class CasiView(BaseView):
             "critic_input": "",
             "critic_output": "",
             "backends": available_backends,
-            "selected_gen_backend": "openrouter",
-            "selected_crit_backend": "openrouter",
-            # Renamed keys to break browser autofill
-            "gen_model_id": "qwen/qwen3-32b",
-            "crit_model_id": "qwen/qwen3-32b",
+            "selected_gen_backend": "google",
+            "selected_crit_backend": "google",
+            "gen_model_id": "models/gemini-2.5-flash",
+            "crit_model_id": "models/gemini-2.5-flash",
+            "max_iterations": 5,
+            "openai_keys": [], # Placeholder if we want to list saved keys
+            "anthropic_keys": []
         }
 
         # Check for history ID in session
@@ -420,10 +422,12 @@ class CasiView(BaseView):
             return trace_id
 
         if request.method == 'POST':
-            context['selected_gen_backend'] = request.form.get('generator_backend', 'openrouter')
-            context['selected_crit_backend'] = request.form.get('critic_backend', 'openrouter')
-            context['gen_model_id'] = request.form.get('gen_model_id') or context.get('gen_model_id')
-            context['crit_model_id'] = request.form.get('crit_model_id') or context.get('crit_model_id')
+            context['selected_gen_backend'] = request.form.get('generator_backend', 'google')
+            context['selected_crit_backend'] = request.form.get('critic_backend', 'google')
+            context['gen_model_id'] = request.form.get('gen_model_id')
+            context['crit_model_id'] = request.form.get('crit_model_id')
+            if not context['gen_model_id']: context['gen_model_id'] = "models/gemini-2.5-flash"
+            if not context['crit_model_id']: context['crit_model_id'] = "models/gemini-2.5-flash"
             context['generator_prompt'] = request.form.get('generator_prompt')
             context['critic_prompt'] = request.form.get('critic_prompt')
             context['generator_input'] = request.form.get('generator_input')
@@ -472,6 +476,8 @@ class CasiView(BaseView):
                         gen_model = 'qwen/qwen3-32b'
                     elif context['selected_gen_backend'] == 'groq' and not gen_model:
                         gen_model = 'llama3-8b-8192'
+                    elif context['selected_gen_backend'] == 'google' and not gen_model:
+                        gen_model = 'models/gemini-2.5-flash'
 
                 # Prepare Input with Context from State
                 initial_input = casi_state.get('casi_initial_input', context['generator_input'])
@@ -541,6 +547,8 @@ class CasiView(BaseView):
                         crit_model = 'qwen/qwen3-32b'
                     elif context['selected_crit_backend'] == 'groq' and not crit_model:
                         crit_model = 'llama3-8b-8192'
+                    elif context['selected_crit_backend'] == 'google' and not crit_model:
+                        crit_model = 'models/gemini-2.5-flash'
 
                 crit_output, _, crit_trace = casi.critic(
                     backend=context['selected_crit_backend'],
@@ -610,6 +618,8 @@ class CasiView(BaseView):
                         gen_model = 'qwen/qwen3-32b'
                     elif context['selected_gen_backend'] == 'groq' and not gen_model:
                         gen_model = 'llama3-8b-8192'
+                    elif context['selected_gen_backend'] == 'google' and not gen_model:
+                        gen_model = 'models/gemini-2.5-flash'
                 
                 crit_model = context.get('crit_model_id')
                 if not crit_model: 
@@ -618,6 +628,8 @@ class CasiView(BaseView):
                         crit_model = 'qwen/qwen3-32b'
                     elif context['selected_crit_backend'] == 'groq' and not crit_model:
                         crit_model = 'llama3-8b-8192'
+                    elif context['selected_crit_backend'] == 'google' and not crit_model:
+                        crit_model = 'models/gemini-2.5-flash'
 
                 # --- Cycle Logic ---
                 history = load_history_from_session()
