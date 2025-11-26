@@ -450,12 +450,29 @@ def run_automatic_cycle(
 def format_history_as_text(history: List[Dict[str, Any]]) -> str:
     """Formats the conversation history into a readable text log."""
     output = []
+    
+    # 1. Place the User's Initial Idea at the very top
+    if history and len(history) > 0:
+        first_step = history[0]
+        # in step_cycle logic, iteration 1 has the real input. 
+        # If the history was started manually, it should also be there.
+        initial_idea = first_step.get('generator_input', '')
+        output.append("### USER INITIAL IDEA ###\n")
+        output.append(f"{initial_idea}\n")
+        output.append("=" * 50 + "\n\n")
+
+    # 2. Iterate through steps with clear markings
     for step in history:
-        output.append(f"=== Iteration {step['iteration']} ===")
-        if step['iteration'] == 1:
-            output.append(f"Original Input:\n{step.get('generator_input', '')}\n")
+        output.append(f"=== Iteration {step['iteration']} ===\n")
         
-        output.append(f"--- Generator Output ---\n{step.get('generator_output', '')}\n")
-        output.append(f"--- Critic Feedback ---\n{step.get('critic_output', '')}\n")
-        output.append("-" * 40 + "\n")
+        # Generator Section
+        output.append("### GENERATOR ###\n")
+        output.append(f"{step.get('generator_output', '')}\n")
+        
+        # Critic Section
+        output.append("\n### CRITIC ###\n")
+        output.append(f"{step.get('critic_output', '')}\n")
+        
+        output.append("\n" + "-" * 50 + "\n\n")
+        
     return "".join(output)
