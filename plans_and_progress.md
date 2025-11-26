@@ -1,10 +1,16 @@
 # CASI: Plans and Progress
-**Date:** November 23, 2025
+**Date:** November 25, 2025
 
 ## Current Status
 The remote deployment is stable. "Run Generator", "Run Critic", and "Automatic Cycle" are operational.
-*   **Default Backend:** Now set to **Google (Gemini 2.5 Flash)** to utilize the free tier for testing.
-*   **Logic Fixes:** Generator prompt now correctly switches to "Iteration Mode" after the first critique. Download Trace button works immediately.
+*   **Default Backend:** Google (Gemini 2.5 Flash) - free tier for testing.
+*   **Session Management:** 
+    *   ✅ "Start Fresh" button clears all fields and history for new ideas.
+    *   ✅ Page refresh automatically clears session (no more "Resuming at Round 14" confusion).
+*   **UX Improvements:**
+    *   ✅ Hover tips on all buttons and inputs.
+    *   ✅ Brief descriptions under Generator/Critic headers.
+*   **Logic Fixes:** Generator prompt switches to "Iteration Mode" after first critique. Download Trace button works immediately.
 *   **Dependencies:** `google-generativeai` installed on server.
 
 ---
@@ -30,8 +36,12 @@ The remote deployment is stable. "Run Generator", "Run Critic", and "Automatic C
 ## Proposed Improvements (AI Suggestions)
 
 ### 1. UI/UX Enhancements
+*   ✅ ~~Hover Tips~~ - Implemented Nov 25.
 *   **Visual State Indicator:** A dynamic diagram or progress bar showing exactly where the process is (e.g., "Generator is thinking..." -> "Critic is reviewing...").
-*   **Preset Scenarios:** A dropdown to pre-fill prompts for common tasks (e.g., "Creative Writing", "Code Debugging", "Business Strategy") so users don't have to write system prompts from scratch.
+*   **Preset Scenarios:** A dropdown to pre-fill prompts for common tasks. Each preset includes a full prompt set:
+    *   `generator_initial`, `generator_iteration`, `critic_initial`, `critic_iteration`
+    *   Example presets: "Code Review", "Essay Refinement", "Brainstorming", "Business Strategy"
+    *   Store in `prompts.json` as nested objects.
 *   **Collapsible History:** Automatically collapse older iterations in the "Session History" to keep the view clean, with a "Expand All" toggle.
 *   **Real-time Streaming:** If supported by the backend/hosting, stream the text generation to the UI instead of waiting for the full response (reduces perceived latency).
 
@@ -53,3 +63,19 @@ The remote deployment is stable. "Run Generator", "Run Critic", and "Automatic C
 ### 5. Usage Limits & Access Control (Post-Testing Phase)
 *   **User-Provided Keys:** Re-introduce optional input fields for Google and Groq keys so power users can bypass free-tier limits and use their own quotas.
 *   **Rate Limiter:** Implement a rate limiting mechanism (e.g., Flask-Limiter) for the default free-tier keys to prevent abuse and exhaustion of the quota.
+
+---
+
+## Priority Roadmap
+
+| Priority | Feature | Effort | Impact | Status |
+|----------|---------|--------|--------|--------|
+| 1 | Hover Tips | Low | High (UX) | ✅ Done |
+| 2 | Start Fresh / Session Clear | Low | High (UX) | ✅ Done |
+| 3 | Input Validation (empty check) | Low | Medium | Pending |
+| 4 | Web Search Checkbox | Medium | High | Pending - test first |
+| 5 | Preset Scenarios Dropdown | Medium | High (UX) | Pending |
+| 6 | Visual Flow Arrows | Medium | High (UX) | Pending |
+| 7 | Rate Limiter | Medium | Required | Pre-public |
+| 8 | Async Task Queue | High | High (stability) | Future |
+| 9 | Meta-Feedback Agent | High | Experimental | Future |

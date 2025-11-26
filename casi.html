@@ -65,9 +65,10 @@ anthropic_keys: {{ anthropic_keys }}
             <!-- Generator Column -->
             <div class="col-md-6">
                 <h4><i class="fa fa-lightbulb-o"></i> Generator</h4>
+                <p><small class="text-muted">The Generator creates and refines ideas based on your input and the Critic's feedback.</small></p>
                 <div class="form-group">
                     <label for="generator_backend">Backend:</label>
-                    <select class="form-control" id="generator_backend" name="generator_backend">
+                    <select class="form-control" id="generator_backend" name="generator_backend" title="Choose which AI service powers the Generator. Google is free but rate-limited.">
                         {% for backend in backends %}
                         <option value="{{ backend }}" {% if backend == selected_gen_backend %}selected{% endif %}>{{ backend|capitalize }}</option>
                         {% endfor %}
@@ -84,7 +85,7 @@ anthropic_keys: {{ anthropic_keys }}
                 </div>
                 <div class="form-group">
                     <label for="gen_model_id">Generator Model ID (optional):</label>
-                    <input type="text" class="form-control" name="gen_model_id" value="{{ gen_model_id or '' }}">
+                    <input type="text" class="form-control" name="gen_model_id" value="{{ gen_model_id or '' }}" title="Specify a model ID, or leave blank for the default (Gemini 2.5 Flash for Google).">
                     <p class="help-block">
                         <small>
                             Leave blank to use the default model for the selected backend. For OpenRouter, you can enter
@@ -94,18 +95,18 @@ anthropic_keys: {{ anthropic_keys }}
                 </div>
                 <div class="form-group">
                     <label for="generator_prompt">System Prompt:</label>
-                    <textarea class="form-control" name="generator_prompt" rows="3">{{ generator_prompt }}</textarea>
+                    <textarea class="form-control" name="generator_prompt" rows="3" title="The system prompt that guides the Generator's behavior. This switches to 'Iteration Mode' after the first critique.">{{ generator_prompt }}</textarea>
                 </div>
                 <div class="form-group">
                     <label for="generator_input">Initial Idea / User Input:</label>
-                    <textarea class="form-control" name="generator_input" rows="4" placeholder="Enter your initial idea here...">{{ generator_input }}</textarea>
+                    <textarea class="form-control" name="generator_input" rows="4" placeholder="Enter your initial idea here..." title="Your starting idea or concept. The Generator will expand and formalize this.">{{ generator_input }}</textarea>
                 </div>
                 <div class="form-group">
                     <label for="critic_output">Feedback from Critic (Input for this turn):</label>
                     <textarea class="form-control" name="critic_output" rows="5" readonly>{{ critic_output }}</textarea>
                 </div>
-                <button type="submit" name="action" value="run_generator" class="btn btn-primary">Run Generator</button>
-                <button type="submit" name="action" value="start_fresh" class="btn btn-warning" style="margin-left: 10px;">Start Fresh</button>
+                <button type="submit" name="action" value="run_generator" class="btn btn-primary" title="Send your idea to the Generator AI for expansion and refinement.">Run Generator</button>
+                <button type="submit" name="action" value="start_fresh" class="btn btn-warning" style="margin-left: 10px;" title="Clear all fields and history to start a completely new idea.">Start Fresh</button>
                 <hr>
                 <div class="form-group">
                     <label for="generator_output_display">Generator's Output:</label>
@@ -116,9 +117,10 @@ anthropic_keys: {{ anthropic_keys }}
             <!-- Critic Column -->
             <div class="col-md-6">
                 <h4><i class="fa fa-gavel"></i> Critic</h4>
+                <p><small class="text-muted">The Critic analyzes the Generator's output and provides constructive feedback.</small></p>
                 <div class="form-group">
                     <label for="critic_backend">Backend:</label>
-                    <select class="form-control" id="critic_backend" name="critic_backend">
+                    <select class="form-control" id="critic_backend" name="critic_backend" title="Choose which AI service powers the Critic. Can be different from the Generator.">
                         {% for backend in backends %}
                         <option value="{{ backend }}" {% if backend == selected_crit_backend %}selected{% endif %}>{{ backend|capitalize }}</option>
                         {% endfor %}
@@ -132,7 +134,7 @@ anthropic_keys: {{ anthropic_keys }}
                 </div>
                 <div class="form-group">
                     <label for="crit_model_id">Critic Model ID (optional):</label>
-                    <input type="text" class="form-control" name="crit_model_id" value="{{ crit_model_id or '' }}">
+                    <input type="text" class="form-control" name="crit_model_id" value="{{ crit_model_id or '' }}" title="Specify a model ID, or leave blank for the default.">
                     <p class="help-block">
                         <small>
                             Leave blank to use the default model for the selected backend.
@@ -141,13 +143,13 @@ anthropic_keys: {{ anthropic_keys }}
                 </div>
                 <div class="form-group">
                     <label for="critic_prompt">System Prompt:</label>
-                    <textarea class="form-control" name="critic_prompt" rows="3">{{ critic_prompt }}</textarea>
+                    <textarea class="form-control" name="critic_prompt" rows="3" title="The system prompt that guides the Critic's analysis style and focus areas.">{{ critic_prompt }}</textarea>
                 </div>
                 <div class="form-group">
                     <label for="critic_input">Generator's Output (Input for this turn):</label>
                     <textarea class="form-control" name="critic_input" rows="12" readonly>{{ critic_input }}</textarea>
                 </div>
-                <button type="submit" name="action" value="run_critic" class="btn btn-info">Run Critic</button>
+                <button type="submit" name="action" value="run_critic" class="btn btn-info" title="Send the Generator's output to the Critic for analysis and feedback.">Run Critic</button>
                 <hr>
                 <div class="form-group">
                     <label for="critic_output_display">Critic's Feedback:</label>
@@ -164,12 +166,12 @@ anthropic_keys: {{ anthropic_keys }}
             <div class="col-md-4">
                 <div class="form-group">
                      <label for="max_iterations">Max Iterations:</label>
-                     <input type="number" class="form-control" name="max_iterations" value="{{ max_iterations or 5 }}" min="1" max="20">
+                     <input type="number" class="form-control" name="max_iterations" value="{{ max_iterations or 5 }}" min="1" max="20" title="How many Generator→Critic cycles to run automatically (1-20).">
                 </div>
             </div>
             <div class="col-md-8">
                 <div class="form-group" style="margin-top: 25px;">
-                    <button type="submit" name="action" value="run_cycle" class="btn btn-success btn-block">Run Full Automatic Cycle</button>
+                    <button type="submit" name="action" value="run_cycle" class="btn btn-success btn-block" title="Automatically alternate between Generator and Critic for the specified number of iterations.">Run Full Automatic Cycle</button>
                     <button type="submit" id="step_cycle_btn" name="action" value="step_cycle" style="display:none;">Step Cycle</button>
                 </div>
             </div>
@@ -217,6 +219,7 @@ anthropic_keys: {{ anthropic_keys }}
                         name="action"
                         value="download_trace"
                         class="btn btn-primary"
+                        title="Download a text file containing the full conversation history."
                         {% if not has_history %}disabled{% endif %}>
                     Download Trace (Text)
                 </button>
