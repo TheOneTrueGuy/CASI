@@ -348,6 +348,20 @@ class CasiView(BaseView):
             session.pop('casi_history', None)
             session.modified = True
 
+        # On GET request (page load/refresh), clear previous session data for a fresh start
+        if request.method == 'GET':
+            old_trace_id = session.pop('casi_trace_id', None)
+            if old_trace_id:
+                try:
+                    trace_file = f"/tmp/casi_trace_{old_trace_id}.json"
+                    context_file = f"/tmp/casi_context_{old_trace_id}.json"
+                    if os.path.exists(trace_file):
+                        os.remove(trace_file)
+                    if os.path.exists(context_file):
+                        os.remove(context_file)
+                except Exception:
+                    pass  # Silently ignore file deletion errors
+
         prompts = {
             "generator": casi.config.prompts.get("generator_initial", "Formalize and expand this idea."),
             "critic": casi.config.prompts.get("critic_initial", "Analyze and critique this idea.")
