@@ -458,6 +458,31 @@ class CasiView(BaseView):
                 session['openrouter_api_key'] = request.form.get('openrouter_api_key', '')
                 flash('API keys updated.', 'info')
 
+            elif action == 'start_fresh':
+                # Clear session trace ID and delete associated files
+                old_trace_id = session.pop('casi_trace_id', None)
+                if old_trace_id:
+                    try:
+                        trace_file = f"/tmp/casi_trace_{old_trace_id}.json"
+                        context_file = f"/tmp/casi_context_{old_trace_id}.json"
+                        if os.path.exists(trace_file):
+                            os.remove(trace_file)
+                        if os.path.exists(context_file):
+                            os.remove(context_file)
+                    except Exception as e:
+                        pass  # Silently ignore file deletion errors
+                
+                # Reset all form fields to defaults
+                context['generator_input'] = ""
+                context['generator_output'] = ""
+                context['critic_input'] = ""
+                context['critic_output'] = ""
+                context['generator_prompt'] = prompts["generator"]
+                context['critic_prompt'] = prompts["critic"]
+                context['has_history'] = False
+                
+                flash('Session cleared. Ready for a new idea!', 'success')
+
             elif action == 'run_generator':
                 # Load existing history & state
                 history = load_history_from_session()
