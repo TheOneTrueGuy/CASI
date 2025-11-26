@@ -1,8 +1,11 @@
 # CASI: Plans and Progress
-**Date:** November 22, 2025
+**Date:** November 23, 2025
 
 ## Current Status
-The remote deployment is stable. "Run Generator", "Run Critic", and "Automatic Cycle" (with resume/step functionality) are operational. State management has been moved to server-side files to prevent 502 errors. The Generator now outputs plain text instead of JSON.
+The remote deployment is stable. "Run Generator", "Run Critic", and "Automatic Cycle" are operational.
+*   **Default Backend:** Now set to **Google (Gemini 2.5 Flash)** to utilize the free tier for testing.
+*   **Logic Fixes:** Generator prompt now correctly switches to "Iteration Mode" after the first critique. Download Trace button works immediately.
+*   **Dependencies:** `google-generativeai` installed on server.
 
 ---
 
@@ -12,9 +15,9 @@ The remote deployment is stable. "Run Generator", "Run Critic", and "Automatic C
 *   **Issue:** The interface can be overwhelming for new users.
 *   **Goal:** Make the interface more intuitive and self-guiding.
 *   **Suggestions:**
-    *   Add page elements, resources, or graphics to provide hints.
-    *   Implement a "Walkthrough" or "Tour" mode for first-time users.
-    *   Add tooltips to technical terms (e.g., "Temperature", "System Prompt").
+    *   **Visual Guidance:** Add arrows or pointers directing the user from "Generator" -> "Critic" -> "Next Step" to visualize the flow.
+    *   **Hover Tips:** Add tooltips to buttons and labels explaining their function (e.g., "This runs the Generator using the selected backend").
+    *   **Tour Mode:** Implement a "Walkthrough" for first-time users.
 
 ### 2. Dynamic Prompts & Meta-Feedback
 *   **Issue:** System prompts remain static throughout the cycle (except for the basic switch to "Iteration Mode").
@@ -46,3 +49,7 @@ The remote deployment is stable. "Run Generator", "Run Critic", and "Automatic C
 ### 3. Technical Stability
 *   **Async Task Queue:** Move the LLM calls to a background task queue (like Celery or Redis Queue) instead of holding the web request open. This is the robust solution to the "3-4 minute wait" and timeout issues.
 *   **Database Storage:** Move from file-based state (`/tmp/casi_state_...`) to a proper SQLite or PostgreSQL database model for robust history tracking and user sessions.
+
+### 5. Usage Limits & Access Control (Post-Testing Phase)
+*   **User-Provided Keys:** Re-introduce optional input fields for Google and Groq keys so power users can bypass free-tier limits and use their own quotas.
+*   **Rate Limiter:** Implement a rate limiting mechanism (e.g., Flask-Limiter) for the default free-tier keys to prevent abuse and exhaustion of the quota.

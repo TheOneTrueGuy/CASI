@@ -1,0 +1,12 @@
+Groq: https://console.groq.com/keys 
+Google AI Studio (Gemini): https://aistudio.google.com 
+OpenRouter: https://openrouter.ai/keys
+DeepSeek: https://platform.deepseek.com/api_keys
+Cerebras: https://cloud.cerebras.ai
+AIMLAPI: https://aimlapi.com
+GitHub Copilot (via API): https://github.com/features/copilot
+Ollama (local): https://ollama.com/download
+Llama.cpp (local): https://github.com/ggml-org/llama.cpp
+
+
+

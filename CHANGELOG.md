@@ -12,6 +12,10 @@
   - **Streamlit App**: Updated `app.py` to include Qwen in the dropdowns and properly handle empty model inputs.
 - **Features**:
   - **Visual Automatic Cycle**: Refactored the automatic cycle on the remote Flask app to execute step-by-step with page reloads. This allows the user to watch the Generator and Critic exchange unfold in real-time within the text boxes, rather than waiting for the entire batch to finish.
+  - **Seamless Manual/Auto Interoperability**:
+    - Manual actions ("Run Generator", "Run Critic") now read from and write to the unified history file.
+    - The "Run Full Automatic Cycle" logic can now continue from an existing manual session instead of forcing a reset.
+    - This allows users to mix and match manual refinement with automatic looping.
 
 ## [2025-11-20] - Progress Round-Up
 
