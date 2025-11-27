@@ -16,6 +16,12 @@ The remote deployment is stable. "Run Generator", "Run Critic", and "Automatic C
 *   **Bug Fixes (Nov 26):**
     *   Fixed `current_preset_data` undefined error in `app.py` automatic mode.
     *   Fixed `prompts.json` nested structure compatibility in both `app.py` and `remote_views.py`.
+    *   Fixed `st.experimental_rerun()` deprecation → `st.rerun()`.
+    *   Fixed `prompts.json` path resolution for PythonAnywhere server.
+*   **New Features (Nov 26):**
+    *   ✅ Preset dropdown added to Flask UI (Default, Creative Writing, Code Review).
+    *   ✅ "Apply Preset" button loads prompts into Generator/Critic fields.
+    *   ✅ Iteration prompts now use selected preset (not just Default).
 
 ---
 
@@ -78,7 +84,7 @@ The remote deployment is stable. "Run Generator", "Run Critic", and "Automatic C
 | 2 | Start Fresh / Session Clear | Low | High (UX) | ✅ Done |
 | 3 | Input Validation (empty check) | Low | Medium | ✅ Done |
 | 4 | Web Search Checkbox | Medium | High | ✅ Verified & Patched Backend |
-| 5 | Preset Scenarios Dropdown | Medium | High (UX) | ✅ Done |
+| 5 | Preset Scenarios Dropdown | Medium | High (UX) | ✅ Done (Both apps) |
 | 6 | Visual Flow Arrows | Medium | High (UX) | Pending |
 | 7 | Rate Limiter | Medium | Required | Pre-public |
 | 8 | Async Task Queue | High | High (stability) | Future |
