@@ -81,6 +81,25 @@ anthropic_keys: {{ anthropic_keys }}
                 </div>
             </div>
         </div>
+        <!-- Web Search Options -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="checkbox">
+                    <label title="Allow the Generator to search the web for information before responding.">
+                        <input type="checkbox" name="use_search_gen" value="1" {% if use_search_gen %}checked{% endif %}>
+                        <i class="fa fa-search"></i> Enable Web Search for Generator
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="checkbox">
+                    <label title="Allow the Critic to search the web to verify facts and find citations.">
+                        <input type="checkbox" name="use_search_crit" value="1" {% if use_search_crit %}checked{% endif %}>
+                        <i class="fa fa-search"></i> Enable Web Search for Critic
+                    </label>
+                </div>
+            </div>
+        </div>
         <hr>
         <div class="row">
             <!-- Generator Column -->

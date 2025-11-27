@@ -393,7 +393,9 @@ class CasiView(BaseView):
             "openai_keys": [], # Placeholder if we want to list saved keys
             "anthropic_keys": [],
             "preset_names": preset_names,
-            "selected_preset": selected_preset
+            "selected_preset": selected_preset,
+            "use_search_gen": False,
+            "use_search_crit": False
         }
 
         # Check for history ID in session
@@ -459,6 +461,10 @@ class CasiView(BaseView):
             context['critic_input'] = request.form.get('critic_input', '')
             context['critic_output'] = request.form.get('critic_output', '')
             context['max_iterations'] = request.form.get('max_iterations', 5)
+            
+            # Web search checkboxes
+            context['use_search_gen'] = request.form.get('use_search_gen') == '1'
+            context['use_search_crit'] = request.form.get('use_search_crit') == '1'
 
             action = request.form.get('action')
 
@@ -566,7 +572,8 @@ class CasiView(BaseView):
                     prompt=current_gen_prompt,
                     user_input=gen_input_text,
                     critic_feedback="", 
-                    api_key=api_key
+                    api_key=api_key,
+                    use_search=context['use_search_gen']
                 )
                 
                 context['generator_output'] = gen_output
@@ -622,7 +629,8 @@ class CasiView(BaseView):
                     model=crit_model,
                     prompt=context['critic_prompt'],
                     generator_output=context['critic_input'],
-                    api_key=api_key
+                    api_key=api_key,
+                    use_search=context['use_search_crit']
                 )
                 context['critic_output'] = crit_output
                 
@@ -726,7 +734,8 @@ class CasiView(BaseView):
                             prompt=context['generator_prompt'],
                             user_input=context['generator_input'], 
                             critic_feedback="", 
-                            api_key=gen_api_key
+                            api_key=gen_api_key,
+                            use_search=context['use_search_gen']
                         )
                         
                         context['generator_output'] = gen_output
@@ -798,7 +807,8 @@ class CasiView(BaseView):
                                 model=crit_model, 
                                 prompt=current_crit_prompt,
                                 generator_output=crit_input, 
-                                api_key=crit_api_key
+                                api_key=crit_api_key,
+                                use_search=context['use_search_crit']
                             )
                             
                             history.append({
@@ -851,7 +861,8 @@ class CasiView(BaseView):
                                 prompt=current_gen_prompt,
                                 user_input=gen_input_text, 
                                 critic_feedback="", 
-                                api_key=gen_api_key
+                                api_key=gen_api_key,
+                                use_search=context['use_search_gen']
                             )
                             
                             casi_state['casi_last_gen_output'] = gen_output
