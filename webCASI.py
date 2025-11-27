@@ -24,12 +24,16 @@ try:
 except ImportError:
     ollama = None
 
-# Search tool import
+# Search tool import - try new package name first, fall back to old
 try:
-    from duckduckgo_search import DDGS
+    from ddgs import DDGS
     ddgs = DDGS()
 except ImportError:
-    ddgs = None
+    try:
+        from duckduckgo_search import DDGS
+        ddgs = DDGS()
+    except ImportError:
+        ddgs = None
 
 # Load environment variables from .env file
 load_dotenv()
