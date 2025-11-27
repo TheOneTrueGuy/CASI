@@ -66,19 +66,26 @@ class Config:
         self.prompts = self.load_prompt_templates()
 
     @staticmethod
-    def load_prompt_templates() -> Dict[str, str]:
+    def load_prompt_templates() -> Dict[str, Any]:
         default_prompts = {
-            "generator_initial": "You are a relentless and creative innovator. Formalize and expand this idea. Never give up on solving a problem; if you encounter a block, pivot and find a new angle. Focus on clarity, creativity, and feasibility.",
-            "generator_iteration": "Using your brilliant imagination and knowledge, answer and correct for these criticisms step-by-step with new ideas. Do not agree or acquiesce to the criticisms; instead, find creative ways to solve the problems they point out while preserving the core value of the idea.",
-            "critic_initial": "You are a constructive but mercilessly rigorous critic. Do not hold back. Your job is to find every weak point, logical fallacy, and practical hurdle. If the idea is vague, demand specifics. If it is risky, demand safeguards. Force the idea to prove its worth.",
-            "critic_iteration": "Analyze the revised idea with extreme scrutiny. Do not be easily satisfied by superficial improvements. Check if the Generator actually solved the core issues or just applied a bandage. Be a demanding partner: valid solutions must be praised, but half-measures must be rejected."
+            "Default": {
+                "generator_initial": "You are a relentless and creative innovator. Formalize and expand this idea. Never give up on solving a problem; if you encounter a block, pivot and find a new angle. Focus on clarity, creativity, and feasibility.",
+                "generator_iteration": "Using your brilliant imagination and knowledge, answer and correct for these criticisms step-by-step with new ideas. Do not agree or acquiesce to the criticisms; instead, find creative ways to solve the problems they point out while preserving the core value of the idea.",
+                "critic_initial": "You are a constructive but mercilessly rigorous critic. Do not hold back. Your job is to find every weak point, logical fallacy, and practical hurdle. If the idea is vague, demand specifics. If it is risky, demand safeguards. Force the idea to prove its worth.",
+                "critic_iteration": "Analyze the revised idea with extreme scrutiny. Do not be easily satisfied by superficial improvements. Check if the Generator actually solved the core issues or just applied a bandage. Be a demanding partner: valid solutions must be praised, but half-measures must be rejected."
+            }
         }
         
         prompt_file = Path("prompts.json")
         if prompt_file.exists():
             try:
                 with open(prompt_file, 'r') as f:
-                    return json.load(f)
+                    data = json.load(f)
+                    # Check if this is the old flat format or new nested format
+                    if "generator_initial" in data:
+                        # Convert legacy flat structure to nested Default
+                        return {"Default": data}
+                    return data
             except json.JSONDecodeError:
                 return default_prompts
         return default_prompts
@@ -371,7 +378,9 @@ def run_automatic_cycle(
     max_iterations: int,
     initial_input: str,
     gen_backend: str, gen_model: str, gen_prompt: str, gen_api_key: str,
-    crit_backend: str, crit_model: str, crit_prompt: str, crit_api_key: str
+    crit_backend: str, crit_model: str, crit_prompt: str, crit_api_key: str,
+    use_search_gen: bool = False,
+    use_search_crit: bool = False
 ) -> Dict[str, Any]:
     """Runs the full Generator-Critic cycle automatically for a set number of iterations."""
     history = []
@@ -408,7 +417,8 @@ def run_automatic_cycle(
         # --- Generator's Turn ---
         gen_output, _, gen_trace = generator(
             backend=gen_backend, model=gen_model, prompt=current_gen_prompt,
-            user_input=gen_input_text, critic_feedback="" if i > 0 else critic_feedback, api_key=gen_api_key
+            user_input=gen_input_text, critic_feedback="" if i > 0 else critic_feedback, api_key=gen_api_key,
+            use_search=use_search_gen
         )
         
         # Prepare Critic Input with Context
@@ -421,7 +431,8 @@ def run_automatic_cycle(
         # --- Critic's Turn ---
         crit_output, _, crit_trace = critic(
             backend=crit_backend, model=crit_model, prompt=current_crit_prompt,
-            generator_output=crit_input_text, api_key=crit_api_key
+            generator_output=crit_input_text, api_key=crit_api_key,
+            use_search=use_search_crit
         )
 
         # Store history for this iteration

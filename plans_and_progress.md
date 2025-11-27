@@ -72,10 +72,12 @@ The remote deployment is stable. "Run Generator", "Run Critic", and "Automatic C
 |----------|---------|--------|--------|--------|
 | 1 | Hover Tips | Low | High (UX) | ✅ Done |
 | 2 | Start Fresh / Session Clear | Low | High (UX) | ✅ Done |
-| 3 | Input Validation (empty check) | Low | Medium | Pending |
-| 4 | Web Search Checkbox | Medium | High | Pending - test first |
-| 5 | Preset Scenarios Dropdown | Medium | High (UX) | Pending |
+| 3 | Input Validation (empty check) | Low | Medium | ✅ Done |
+| 4 | Web Search Checkbox | Medium | High | ✅ Verified & Patched Backend |
+| 5 | Preset Scenarios Dropdown | Medium | High (UX) | ✅ Done |
 | 6 | Visual Flow Arrows | Medium | High (UX) | Pending |
 | 7 | Rate Limiter | Medium | Required | Pre-public |
 | 8 | Async Task Queue | High | High (stability) | Future |
 | 9 | Meta-Feedback Agent | High | Experimental | Future |
+| 10 | Orchestrator Agent (Admin/Judge) | High | High (Control) | Future Idea |
+

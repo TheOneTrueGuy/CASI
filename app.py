@@ -240,8 +240,17 @@ with col_gen:
     else:
         gen_model = st.selectbox("Generator Model", service_options[gen_service], key="gen_model")
     
-    default_gen_prompt = casi.config.prompts["generator_initial"]
-    gen_prompt = st.text_area("Generator Prompt", value=(current_state['generator']['prompt'] if current_state else default_gen_prompt), disabled=(gen_mode == "Automatic"))
+    # Determine default prompt based on current state or config
+    if 'gen_prompt_active' not in st.session_state:
+         # Initial load
+         default_preset = casi.config.prompts.get("Default", {})
+         st.session_state.gen_prompt_active = default_preset.get("generator_initial", "")
+
+    # Use key= to bind to session state, but we need to handle manual edits too.
+    # Streamlit trick: If we provide 'value' AND 'key', it warns. 
+    # We want the text area to initialize from state, and update state on edit.
+    gen_prompt = st.text_area("Generator Prompt", key="gen_prompt_active", disabled=(gen_mode == "Automatic"))
+    
     gen_input = st.text_area("Generator Input", value=(current_state['generator']['input'] if current_state else ""), disabled=(gen_mode == "Automatic"))
     gen_output = st.text_area("Generator Output", value=(current_state['generator']['output'] if current_state else ""), disabled=True)
     
@@ -257,28 +266,26 @@ with col_gen:
         if not gen_model:
             gen_model = getattr(casi.config, f"{backend}_model", None)
 
-        
-        # If resend and no previous output, use last input
-        if gen_resend and not gen_output.strip() and thread:
-            prev_input = thread[st.session_state.thread_idx]['generator']['input']
-            gen_input = prev_input
+        # Input Validation
+        if not gen_input.strip():
+            st.warning("Please enter text for the Generator to work on.")
+        else:
+            with st.spinner("Generator is thinking..."):
+                # webCASI returns (response, suggestions, trace_data)
+                gen_result = casi.generator(backend, gen_model, gen_prompt, gen_input, critic_feedback="", api_key=api_key, use_search=use_search_gen)
+                gen_out = gen_result[0]
+                gen_trace = gen_result[2]
             
-        with st.spinner("Generator is thinking..."):
-            # webCASI returns (response, suggestions, trace_data)
-            gen_result = casi.generator(backend, gen_model, gen_prompt, gen_input, critic_feedback="", api_key=api_key, use_search=use_search_gen)
-            gen_out = gen_result[0]
-            gen_trace = gen_result[2]
-        
-        new_state = {
-            'generator': {'prompt': gen_prompt, 'input': gen_input, 'output': gen_out, 'mode': gen_mode, 'resend': gen_resend, 'service': gen_service, 'model': gen_model},
-            'critic': current_state['critic'] if current_state else {'prompt': casi.config.prompts["critic_initial"], 'input': '', 'output': '', 'mode': 'Manual', 'resend': False, 'service': 'Local (Ollama)', 'model': 'llama2'},
-            'timestamp': datetime.datetime.now().isoformat(),
-            'generator_trace': gen_trace
-        }
-        thread = thread[:st.session_state.thread_idx+1] + [new_state]
-        save_thread(thread)
-        st.session_state.thread_idx += 1
-        st.experimental_rerun()
+            new_state = {
+                'generator': {'prompt': gen_prompt, 'input': gen_input, 'output': gen_out, 'mode': gen_mode, 'resend': gen_resend, 'service': gen_service, 'model': gen_model},
+                'critic': current_state['critic'] if current_state else {'prompt': casi.config.prompts["Default"]["critic_initial"], 'input': '', 'output': '', 'mode': 'Manual', 'resend': False, 'service': 'Local (Ollama)', 'model': 'llama2'},
+                'timestamp': datetime.datetime.now().isoformat(),
+                'generator_trace': gen_trace
+            }
+            thread = thread[:st.session_state.thread_idx+1] + [new_state]
+            save_thread(thread)
+            st.session_state.thread_idx += 1
+            st.experimental_rerun()
     
     st.code(serialize_state({'service': gen_service, 'model': gen_model, 'prompt': gen_prompt, 'input': gen_input, 'output': gen_output}, fmt), language=fmt.lower() if fmt != "Text" else "text")
 
@@ -317,22 +324,26 @@ with col_crit:
             prev_input = thread[st.session_state.thread_idx]['critic']['input']
             crit_input = prev_input
             
-        with st.spinner("Critic is thinking..."):
-            # webCASI returns (response, suggestions, trace_data)
-            crit_result = casi.critic(backend, crit_model, crit_prompt, crit_input, api_key=api_key, use_search=use_search_crit)
-            crit_out = crit_result[0]
-            crit_trace = crit_result[2]
-        
-        new_state = {
-            'generator': current_state['generator'] if current_state else {'prompt': casi.config.prompts["generator_initial"], 'input': '', 'output': '', 'mode': 'Manual', 'resend': False, 'service': 'Local (Ollama)', 'model': 'llama2'},
-            'critic': {'prompt': crit_prompt, 'input': crit_input, 'output': crit_out, 'mode': crit_mode, 'resend': crit_resend, 'service': crit_service, 'model': crit_model},
-            'timestamp': datetime.datetime.now().isoformat(),
-            'critic_trace': crit_trace
-        }
-        thread = thread[:st.session_state.thread_idx+1] + [new_state]
-        save_thread(thread)
-        st.session_state.thread_idx += 1
-        st.experimental_rerun()
+        # Input Validation
+        if not crit_input.strip():
+             st.warning("Please provide input for the Critic to review.")
+        else:
+            with st.spinner("Critic is thinking..."):
+                # webCASI returns (response, suggestions, trace_data)
+                crit_result = casi.critic(backend, crit_model, crit_prompt, crit_input, api_key=api_key, use_search=use_search_crit)
+                crit_out = crit_result[0]
+                crit_trace = crit_result[2]
+            
+            new_state = {
+                'generator': current_state['generator'] if current_state else {'prompt': casi.config.prompts["generator_initial"], 'input': '', 'output': '', 'mode': 'Manual', 'resend': False, 'service': 'Local (Ollama)', 'model': 'llama2'},
+                'critic': {'prompt': crit_prompt, 'input': crit_input, 'output': crit_out, 'mode': crit_mode, 'resend': crit_resend, 'service': crit_service, 'model': crit_model},
+                'timestamp': datetime.datetime.now().isoformat(),
+                'critic_trace': crit_trace
+            }
+            thread = thread[:st.session_state.thread_idx+1] + [new_state]
+            save_thread(thread)
+            st.session_state.thread_idx += 1
+            st.experimental_rerun()
         
     st.code(serialize_state({'service': crit_service, 'model': crit_model, 'prompt': crit_prompt, 'input': crit_input, 'output': crit_output}, fmt), language=fmt.lower() if fmt != "Text" else "text")
 
@@ -390,7 +401,10 @@ if (current_state
             backend = get_backend_from_service(gen_service_name)
             api_key = get_api_key_for_backend(backend)
 
-            gen_prompt = casi.config.prompts['generator_iteration']
+            # LOAD ITERATION PROMPT FROM CURRENT PRESET
+            # current_preset_data is loaded in the sidebar
+            gen_prompt = current_preset_data.get("generator_iteration", casi.config.prompts["Default"]["generator_iteration"])
+            
             gen_input = current_state['generator']['output'] # Base for next iteration
             critic_feedback = current_state['critic']['output'] # Feedback for refinement
 
@@ -412,7 +426,7 @@ if (current_state
                     'model': gen_model_name
                 },
                 'critic': {
-                    'prompt': casi.config.prompts['critic_iteration'], 
+                    'prompt': current_preset_data.get("critic_iteration", casi.config.prompts["Default"]["critic_iteration"]), 
                     'input': '', 
                     'output': '', 
                     'mode': 'Automatic', 
