@@ -1,5 +1,5 @@
 # CASI: Plans and Progress
-**Date:** November 25, 2025
+**Date:** November 26, 2025
 
 ## Current Status
 The remote deployment is stable. "Run Generator", "Run Critic", and "Automatic Cycle" are operational.
@@ -10,8 +10,12 @@ The remote deployment is stable. "Run Generator", "Run Critic", and "Automatic C
 *   **UX Improvements:**
     *   ✅ Hover tips on all buttons and inputs.
     *   ✅ Brief descriptions under Generator/Critic headers.
+    *   ✅ Preset Scenarios dropdown (Default, Creative Writing, Code Review) in Streamlit app.
 *   **Logic Fixes:** Generator prompt switches to "Iteration Mode" after first critique. Download Trace button works immediately.
 *   **Dependencies:** `google-generativeai` installed on server.
+*   **Bug Fixes (Nov 26):**
+    *   Fixed `current_preset_data` undefined error in `app.py` automatic mode.
+    *   Fixed `prompts.json` nested structure compatibility in both `app.py` and `remote_views.py`.
 
 ---
 
