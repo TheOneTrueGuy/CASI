@@ -337,9 +337,16 @@ def agentic_step(backend: str, model: str, role: str, prompt: str, context: str,
     # Step 2: Final Generation with Context
     final_prompt = f"{prompt}\n\n"
     if search_context:
-        augmentation = f"Thinking Process:\nI have researched the following information to help with my task:\n{search_context}\n\n"
+        augmentation = f"""**Web Research Conducted:**
+I have researched the following sources to inform my response:
+{search_context}
+
+**IMPORTANT:** When using information from these sources, cite them inline using [Source Title](URL) format. Include a "Sources Cited" section at the end of your response listing all referenced URLs.
+
+"""
         final_prompt += augmentation
         trace["augmented_prompt_snippet"] = augmentation
+        trace["search_was_used"] = True
         
     return final_prompt, trace
 
@@ -357,6 +364,12 @@ def generator(backend: str, model: str, prompt: str, user_input: str, critic_fee
     # json_prompt = f"{final_prompt}. Please respond in JSON format with keys for 'response' and 'suggestions'."
     
     raw_response = generate_response(backend, model, final_prompt, user_input, critic_feedback, api_key=api_key)
+    
+    # Add search indicator if search was used
+    if trace_data.get("search_was_used"):
+        search_queries = trace_data.get("search_queries", [])
+        search_note = f"🔍 *Web search performed ({len(search_queries)} queries)*\n\n"
+        raw_response = search_note + raw_response
     
     # Just return the raw response. Suggestions are empty.
     return raw_response, [], trace_data
@@ -380,6 +393,12 @@ def critic(backend: str, model: str, prompt: str, generator_output: str, api_key
     """
     full_prompt = f"{final_prompt}\n\n{scoring_prompt}\n\nGenerator's Output to critique: {generator_output}"
     response = generate_response(backend, model, full_prompt, "", None, api_key=api_key)
+    
+    # Add search indicator if search was used
+    if trace_data.get("search_was_used"):
+        search_queries = trace_data.get("search_queries", [])
+        search_note = f"🔍 *Web search performed ({len(search_queries)} queries)*\n\n"
+        response = search_note + response
     
     # Simple parsing for suggestions
     suggestions = [line.strip('-* ') for line in response.split('\n') if line.strip().startswith(('-', '*'))]
