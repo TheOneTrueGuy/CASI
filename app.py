@@ -95,11 +95,11 @@ with st.sidebar:
     with col_nav1:
         if st.button("Back"):
             st.session_state.thread_idx = max(0, st.session_state.thread_idx - 1)
-            st.experimental_rerun()
+            st.rerun()
     with col_nav2:
         if st.button("Forward"):
             st.session_state.thread_idx = min(len(load_thread()) - 1, st.session_state.thread_idx + 1)
-            st.experimental_rerun()
+            st.rerun()
 
     fmt = st.radio("Format", ["JSON", "XML", "Text"], key="fmt")
     max_rounds = st.number_input("Max Rounds (Automatic Mode)", min_value=1, max_value=100, value=10, step=1, key="max_rounds")
@@ -121,7 +121,7 @@ with st.sidebar:
         st.session_state.gen_prompt_active = current_preset_data.get("generator_initial", "")
         st.session_state.crit_prompt_active = current_preset_data.get("critic_initial", "")
         st.success(f"Applied '{selected_preset}' preset!")
-        st.experimental_rerun()
+        st.rerun()
     
     st.markdown("---")
     st.subheader("Agentic Capabilities")
@@ -304,7 +304,7 @@ with col_gen:
             thread = thread[:st.session_state.thread_idx+1] + [new_state]
             save_thread(thread)
             st.session_state.thread_idx += 1
-            st.experimental_rerun()
+            st.rerun()
     
     st.code(serialize_state({'service': gen_service, 'model': gen_model, 'prompt': gen_prompt, 'input': gen_input, 'output': gen_output}, fmt), language=fmt.lower() if fmt != "Text" else "text")
 
@@ -366,7 +366,7 @@ with col_crit:
             thread = thread[:st.session_state.thread_idx+1] + [new_state]
             save_thread(thread)
             st.session_state.thread_idx += 1
-            st.experimental_rerun()
+            st.rerun()
         
     st.code(serialize_state({'service': crit_service, 'model': crit_model, 'prompt': crit_prompt, 'input': crit_input, 'output': crit_output}, fmt), language=fmt.lower() if fmt != "Text" else "text")
 
@@ -412,7 +412,7 @@ if (current_state
             thread[-1]['critic_trace'] = crit_trace
             
             save_thread(thread)
-            st.experimental_rerun()
+            st.rerun()
 
         # Generator's turn: The previous round is complete.
         elif is_round_complete:
@@ -464,4 +464,4 @@ if (current_state
             thread.append(new_state)
             save_thread(thread)
             st.session_state.thread_idx += 1
-            st.experimental_rerun()
+            st.rerun()
