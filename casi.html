@@ -61,6 +61,27 @@ anthropic_keys: {{ anthropic_keys }}
             </div>
         </div>
         <hr>
+        <!-- Preset Selector -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="preset_selector"><i class="fa fa-bookmark"></i> Prompt Preset:</label>
+                    <select class="form-control" id="preset_selector" name="preset_selector" title="Select a scenario to load tailored prompts for Generator and Critic.">
+                        {% for preset_name in preset_names %}
+                        <option value="{{ preset_name }}" {% if preset_name == selected_preset %}selected{% endif %}>{{ preset_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group" style="margin-top: 25px;">
+                    <button type="submit" name="action" value="apply_preset" class="btn btn-default" title="Load the selected preset's prompts into Generator and Critic fields.">
+                        <i class="fa fa-magic"></i> Apply Preset
+                    </button>
+                </div>
+            </div>
+        </div>
+        <hr>
         <div class="row">
             <!-- Generator Column -->
             <div class="col-md-6">

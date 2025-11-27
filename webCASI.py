@@ -76,8 +76,19 @@ class Config:
             }
         }
         
-        prompt_file = Path("prompts.json")
-        if prompt_file.exists():
+        # Try multiple paths for prompts.json
+        possible_paths = [
+            Path(__file__).parent / "prompts.json",  # Same directory as this file
+            Path("prompts.json"),  # Current working directory
+            Path("/home/Guyzer/Firsty/app/prompts.json"),  # Absolute path for PythonAnywhere
+        ]
+        prompt_file = None
+        for p in possible_paths:
+            if p.exists():
+                prompt_file = p
+                break
+        
+        if prompt_file:
             try:
                 with open(prompt_file, 'r') as f:
                     data = json.load(f)
