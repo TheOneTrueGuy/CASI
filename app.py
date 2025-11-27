@@ -105,6 +105,25 @@ with st.sidebar:
     max_rounds = st.number_input("Max Rounds (Automatic Mode)", min_value=1, max_value=100, value=10, step=1, key="max_rounds")
     
     st.markdown("---")
+    st.subheader("Prompt Presets")
+    # Load available presets from prompts.json
+    available_presets = list(casi.config.prompts.keys())
+    selected_preset = st.selectbox(
+        "Scenario", 
+        available_presets, 
+        index=0,
+        help="Select a preset to load tailored prompts for Generator and Critic."
+    )
+    current_preset_data = casi.config.prompts.get(selected_preset, casi.config.prompts.get("Default", {}))
+    
+    # Button to apply preset to current prompts
+    if st.button("Apply Preset", help="Load the selected preset's prompts into the Generator and Critic fields."):
+        st.session_state.gen_prompt_active = current_preset_data.get("generator_initial", "")
+        st.session_state.crit_prompt_active = current_preset_data.get("critic_initial", "")
+        st.success(f"Applied '{selected_preset}' preset!")
+        st.experimental_rerun()
+    
+    st.markdown("---")
     st.subheader("Agentic Capabilities")
     use_search_gen = st.checkbox("Enable Web Search for Generator", value=False, help="Allows the Generator to research before creating content.")
     use_search_crit = st.checkbox("Enable Web Search for Critic", value=False, help="Allows the Critic to verify facts and find citations.")
@@ -301,8 +320,12 @@ with col_crit:
     else:
         crit_model = st.selectbox("Critic Model", service_options[crit_service], key="crit_model")
     
-    default_crit_prompt = casi.config.prompts["critic_initial"]
-    crit_prompt = st.text_area("Critic Prompt", value=(current_state['critic']['prompt'] if current_state else default_crit_prompt), disabled=(crit_mode == "Automatic"))
+    # Initialize critic prompt from session state or preset
+    if 'crit_prompt_active' not in st.session_state:
+        default_preset = casi.config.prompts.get("Default", {})
+        st.session_state.crit_prompt_active = default_preset.get("critic_initial", "")
+    
+    crit_prompt = st.text_area("Critic Prompt", key="crit_prompt_active", disabled=(crit_mode == "Automatic"))
     crit_input = st.text_area("Critic Input", value=(current_state['critic']['input'] if current_state else (current_state['generator']['output'] if current_state else "")), disabled=(crit_mode == "Automatic"))
     crit_output = st.text_area("Critic Output", value=(current_state['critic']['output'] if current_state else ""), disabled=True)
     
@@ -335,7 +358,7 @@ with col_crit:
                 crit_trace = crit_result[2]
             
             new_state = {
-                'generator': current_state['generator'] if current_state else {'prompt': casi.config.prompts["generator_initial"], 'input': '', 'output': '', 'mode': 'Manual', 'resend': False, 'service': 'Local (Ollama)', 'model': 'llama2'},
+                'generator': current_state['generator'] if current_state else {'prompt': casi.config.prompts["Default"]["generator_initial"], 'input': '', 'output': '', 'mode': 'Manual', 'resend': False, 'service': 'Local (Ollama)', 'model': 'llama2'},
                 'critic': {'prompt': crit_prompt, 'input': crit_input, 'output': crit_out, 'mode': crit_mode, 'resend': crit_resend, 'service': crit_service, 'model': crit_model},
                 'timestamp': datetime.datetime.now().isoformat(),
                 'critic_trace': crit_trace

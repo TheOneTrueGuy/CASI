@@ -362,9 +362,11 @@ class CasiView(BaseView):
                 except Exception:
                     pass  # Silently ignore file deletion errors
 
+        # Load prompts from nested structure (Default preset)
+        default_preset = casi.config.prompts.get("Default", {})
         prompts = {
-            "generator": casi.config.prompts.get("generator_initial", "Formalize and expand this idea."),
-            "critic": casi.config.prompts.get("critic_initial", "Analyze and critique this idea.")
+            "generator": default_preset.get("generator_initial", "Formalize and expand this idea."),
+            "critic": default_preset.get("critic_initial", "Analyze and critique this idea.")
         }
         available_backends = ["openai", "anthropic", "google", "groq", "openrouter"]
         
@@ -623,8 +625,8 @@ class CasiView(BaseView):
                 
                 # UX Improvement: Automatically switch Generator prompt to "Iteration Mode"
                 current_gen_prompt = context.get('generator_prompt', '').strip()
-                initial_gen_prompt = casi.config.prompts.get("generator_initial", "").strip()
-                iter_gen_prompt = casi.config.prompts.get("generator_iteration", "").strip()
+                initial_gen_prompt = default_preset.get("generator_initial", "").strip()
+                iter_gen_prompt = default_preset.get("generator_iteration", "").strip()
                 
                 if current_gen_prompt == initial_gen_prompt and iter_gen_prompt:
                     context['generator_prompt'] = iter_gen_prompt
@@ -761,8 +763,8 @@ class CasiView(BaseView):
                             
                             current_crit_prompt = context['critic_prompt']
                             if current_iter > 1:
-                                iter_prompt = casi.config.prompts.get("critic_iteration")
-                                if iter_prompt and current_crit_prompt == casi.config.prompts.get("critic_initial"):
+                                iter_prompt = default_preset.get("critic_iteration")
+                                if iter_prompt and current_crit_prompt == default_preset.get("critic_initial"):
                                     current_crit_prompt = iter_prompt
 
                             crit_output, _, crit_trace = casi.critic(
@@ -809,8 +811,8 @@ class CasiView(BaseView):
                             history_text = casi.format_history_as_text(history)
                             
                             current_gen_prompt = context['generator_prompt']
-                            iter_prompt = casi.config.prompts.get("generator_iteration")
-                            if iter_prompt and current_gen_prompt == casi.config.prompts.get("generator_initial"):
+                            iter_prompt = default_preset.get("generator_iteration")
+                            if iter_prompt and current_gen_prompt == default_preset.get("generator_initial"):
                                 current_gen_prompt = iter_prompt
                                 context['generator_prompt'] = iter_prompt
                             
