@@ -101,6 +101,33 @@ anthropic_keys: {{ anthropic_keys }}
             </div>
         </div>
         <hr>
+        <!-- Visual Flow Diagram -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="flow-diagram text-center" style="padding: 15px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 8px; margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 10px;">
+                        <div class="flow-step" style="padding: 10px 20px; background: #5cb85c; color: white; border-radius: 25px; font-weight: bold;">
+                            <i class="fa fa-lightbulb-o"></i> Generator
+                        </div>
+                        <div class="flow-arrow" style="font-size: 24px; color: #337ab7;">
+                            <i class="fa fa-long-arrow-right"></i>
+                        </div>
+                        <div class="flow-step" style="padding: 10px 20px; background: #f0ad4e; color: white; border-radius: 25px; font-weight: bold;">
+                            <i class="fa fa-balance-scale"></i> Critic
+                        </div>
+                        <div class="flow-arrow" style="font-size: 24px; color: #337ab7;">
+                            <i class="fa fa-long-arrow-right"></i>
+                        </div>
+                        <div class="flow-step" style="padding: 10px 20px; background: #5bc0de; color: white; border-radius: 25px; font-weight: bold;">
+                            <i class="fa fa-refresh"></i> Iterate
+                        </div>
+                    </div>
+                    <p class="text-muted" style="margin-top: 10px; margin-bottom: 0; font-size: 12px;">
+                        <i class="fa fa-info-circle"></i> The Generator creates content → The Critic reviews and scores → Feedback loops back for refinement
+                    </p>
+                </div>
+            </div>
+        </div>
         <div class="row">
             <!-- Generator Column -->
             <div class="col-md-6">
@@ -223,23 +250,90 @@ anthropic_keys: {{ anthropic_keys }}
     <hr>
     <div class="row">
         <div class="col-md-12">
-            <h3><i class="fa fa-history"></i> Session History</h3>
+            <h3>
+                <i class="fa fa-history"></i> Session History
+                <button type="button" class="btn btn-sm btn-default pull-right" onclick="toggleAllHistory()" id="toggleAllBtn" title="Expand or collapse all history items">
+                    <i class="fa fa-expand"></i> Expand All
+                </button>
+            </h3>
             {% for item in cycle_history %}
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h4 class="panel-title">Iteration #{{ item.iteration }}</h4>
+            <div class="panel panel-default history-panel">
+                <div class="panel-heading" style="cursor: pointer;" onclick="toggleHistoryItem(this)" title="Click to expand/collapse">
+                    <h4 class="panel-title">
+                        <i class="fa fa-chevron-right toggle-icon"></i>
+                        Iteration #{{ item.iteration }}
+                        <span class="text-muted pull-right" style="font-size: 12px; font-weight: normal;">
+                            <i class="fa fa-lightbulb-o"></i> {{ item.generator_output|length }} chars
+                            &nbsp;|&nbsp;
+                            <i class="fa fa-balance-scale"></i> {{ item.critic_output|length }} chars
+                        </span>
+                    </h4>
                 </div>
-                <div class="panel-body">
-                    <h5>Generator Output</h5>
-                    <pre>{{ item.generator_output }}</pre>
+                <div class="panel-body history-content" style="display: none;">
+                    <h5><i class="fa fa-lightbulb-o text-success"></i> Generator Output</h5>
+                    <pre style="white-space: pre-wrap; max-height: 300px; overflow-y: auto;">{{ item.generator_output }}</pre>
                     <hr>
-                    <h5>Critic Feedback</h5>
-                    <pre>{{ item.critic_output }}</pre>
+                    <h5><i class="fa fa-balance-scale text-warning"></i> Critic Feedback</h5>
+                    <pre style="white-space: pre-wrap; max-height: 300px; overflow-y: auto;">{{ item.critic_output }}</pre>
                 </div>
             </div>
             {% endfor %}
         </div>
     </div>
+    <script>
+    function toggleHistoryItem(header) {
+        var content = header.nextElementSibling;
+        var icon = header.querySelector('.toggle-icon');
+        if (content.style.display === 'none') {
+            content.style.display = 'block';
+            icon.classList.remove('fa-chevron-right');
+            icon.classList.add('fa-chevron-down');
+        } else {
+            content.style.display = 'none';
+            icon.classList.remove('fa-chevron-down');
+            icon.classList.add('fa-chevron-right');
+        }
+        updateToggleAllButton();
+    }
+    
+    function toggleAllHistory() {
+        var panels = document.querySelectorAll('.history-panel');
+        var anyCollapsed = false;
+        panels.forEach(function(panel) {
+            var content = panel.querySelector('.history-content');
+            if (content.style.display === 'none') anyCollapsed = true;
+        });
+        panels.forEach(function(panel) {
+            var content = panel.querySelector('.history-content');
+            var icon = panel.querySelector('.toggle-icon');
+            if (anyCollapsed) {
+                content.style.display = 'block';
+                icon.classList.remove('fa-chevron-right');
+                icon.classList.add('fa-chevron-down');
+            } else {
+                content.style.display = 'none';
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-right');
+            }
+        });
+        updateToggleAllButton();
+    }
+    
+    function updateToggleAllButton() {
+        var panels = document.querySelectorAll('.history-panel');
+        var allExpanded = true;
+        panels.forEach(function(panel) {
+            var content = panel.querySelector('.history-content');
+            if (content.style.display === 'none') allExpanded = false;
+        });
+        var btn = document.getElementById('toggleAllBtn');
+        if (allExpanded) {
+            btn.innerHTML = '<i class="fa fa-compress"></i> Collapse All';
+        } else {
+            btn.innerHTML = '<i class="fa fa-expand"></i> Expand All';
+        }
+    }
+    </script>
     {% endif %}
 
     <hr>

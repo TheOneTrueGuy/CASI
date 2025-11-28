@@ -1,5 +1,5 @@
 # CASI: Plans and Progress
-**Date:** November 26, 2025
+**Date:** November 27, 2025
 
 ## Current Status
 The remote deployment is stable. "Run Generator", "Run Critic", and "Automatic Cycle" are operational.
@@ -22,6 +22,11 @@ The remote deployment is stable. "Run Generator", "Run Critic", and "Automatic C
     *   ✅ Preset dropdown added to Flask UI (Default, Creative Writing, Code Review).
     *   ✅ "Apply Preset" button loads prompts into Generator/Critic fields.
     *   ✅ Iteration prompts now use selected preset (not just Default).
+*   **New Features (Nov 27):**
+    *   ✅ Web Search for Generator/Critic with citation instructions.
+    *   ✅ Visible search indicator (🔍) when web search is used.
+    *   ✅ LLM instructed to cite sources inline and include "Sources Cited" section.
+    *   Fixed `ddgs` package (renamed from `duckduckgo_search`).
 
 ---
 
@@ -73,6 +78,13 @@ The remote deployment is stable. "Run Generator", "Run Critic", and "Automatic C
 ### 5. Usage Limits & Access Control (Post-Testing Phase)
 *   **User-Provided Keys:** Re-introduce optional input fields for Google and Groq keys so power users can bypass free-tier limits and use their own quotas.
 *   **Rate Limiter:** Implement a rate limiting mechanism (e.g., Flask-Limiter) for the default free-tier keys to prevent abuse and exhaustion of the quota.
+
+### 6. API Key Section UX Improvements (Future)
+*   **Visibility Toggle:** Eye icon to show/hide key values (password-style masking).
+*   **Test Connection Button:** Verify key validity with a quick API ping.
+*   **Key Status Indicator:** Green checkmark when key is valid/saved, red X if invalid.
+*   **Clear/Reset Button:** Per-key field to quickly remove a saved key.
+*   **Collapsible Section:** Hide the entire API key section once keys are saved to reduce clutter.
 
 ---
 
