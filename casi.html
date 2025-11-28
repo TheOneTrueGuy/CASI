@@ -10,6 +10,24 @@ anthropic_keys: {{ anthropic_keys }}
     <p>The Generator's output is automatically used as the Critic's input for the next step.</p>
     <hr>
     <form method="POST">
+        <!-- Model Quality Note -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="alert alert-info" style="border-left: 4px solid #31708f;">
+                    <h5 style="margin-top: 0;"><i class="fa fa-lightbulb-o"></i> Better Models = Better Results</h5>
+                    <p style="margin-bottom: 5px;">
+                        The free <strong>Google Gemini 2.5 Flash</strong> model works for testing but may drift or hallucinate on complex tasks. 
+                        For production-quality output, consider using your own API key with more capable models:
+                    </p>
+                    <ul style="margin-bottom: 0; padding-left: 20px;">
+                        <li><strong>Google:</strong> Gemini 2.5 Pro (<a href="https://aistudio.google.com/apikey" target="_blank">Get API Key</a>)</li>
+                        <li><strong>Anthropic:</strong> Claude Sonnet 4 or Opus 4 (<a href="https://console.anthropic.com/" target="_blank">Get API Key</a>)</li>
+                        <li><strong>OpenAI:</strong> GPT-4o or o1 (<a href="https://platform.openai.com/api-keys" target="_blank">Get API Key</a>)</li>
+                        <li><strong>OpenRouter:</strong> Access multiple providers with one key (<a href="https://openrouter.ai/keys" target="_blank">Get API Key</a>)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
         <div class="row">
             <div class="col-md-12">
                 <h4><i class="fa fa-key"></i> API Keys (Optional)</h4>
